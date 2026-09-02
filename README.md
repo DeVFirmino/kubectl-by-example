@@ -20,6 +20,10 @@ kind create cluster --name ckad
 kind delete cluster --name ckad
 ```
 
+## Diagrams
+
+Drawn with the skill in [`.claude/skills/daniel-diagram`](.claude/skills/daniel-diagram/SKILL.md): a JSON spec (Excalidraw-compatible) rendered with rough.js and captured as PNG. Each section keeps the spec, the HTML source and the image.
+
 ## License
 
 [MIT](LICENSE)
