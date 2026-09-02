@@ -2,7 +2,9 @@
 
 A Pod is the smallest thing Kubernetes schedules. It wraps one or more containers and gives them a shared network and storage. Most of the time one Pod holds one container, and that is the only case this section covers.
 
-![Cluster, node, pod, container](img/diagram.png)
+Every `kubectl` command goes to the API server in the control plane. The scheduler picks a node, and the kubelet on that node asks the container runtime to start the container. The diagram source is in [`diagram-source.html`](diagram-source.html) (rough.js) and [`cluster-node-pod-container.excalidraw`](cluster-node-pod-container.excalidraw).
+
+![kubectl talks to the control plane, which schedules pods onto a node where the kubelet and container runtime start the containers](img/diagram.png)
 
 ## Create a pod
 

@@ -1,0 +1,53 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+<style>body{margin:0;background:#FBF4E6} svg{display:block}</style></head><body>
+<svg id="s" xmlns="http://www.w3.org/2000/svg" width="900" height="780" viewBox="0 0 900 780"><rect width="100%" height="100%" fill="#FBF4E6"/></svg>
+<script>
+const svg=document.getElementById('s'); const rc=rough.svg(svg);
+const rr=(x,y,w,h,r)=>`M${x+r},${y} h${w-2*r} a${r},${r} 0 0 1 ${r},${r} v${h-2*r} a${r},${r} 0 0 1 -${r},${r} h-${w-2*r} a${r},${r} 0 0 1 -${r},-${r} v-${h-2*r} a${r},${r} 0 0 1 ${r},-${r} z`;
+function rect(x,y,w,h,fill,stroke,op){const g=rc.path(rr(x,y,w,h,12),{fill,stroke,strokeWidth:2,fillStyle:'solid',roughness:1.2,bowing:1,seed:Math.floor(x*7+y*13)});g.setAttribute('opacity',op);svg.appendChild(g);}
+function arrow(pts,stroke){const g=rc.linearPath(pts,{stroke,strokeWidth:2,roughness:1,seed:Math.floor(pts[0][0]*3+pts[0][1])});svg.appendChild(g);
+ const [a,b]=[pts[pts.length-2],pts[pts.length-1]];const ang=Math.atan2(b[1]-a[1],b[0]-a[0]);const L=12,W=6;
+ const p1=[b[0]-L*Math.cos(ang)+W*Math.sin(ang),b[1]-L*Math.sin(ang)-W*Math.cos(ang)];const p2=[b[0]-L*Math.cos(ang)-W*Math.sin(ang),b[1]-L*Math.sin(ang)+W*Math.cos(ang)];
+ svg.appendChild(rc.linearPath([p1,b,p2],{stroke,strokeWidth:2,roughness:0.8}));}
+function text(x,y,t,fs,c,fam,w,anchor){const e=document.createElementNS('http://www.w3.org/2000/svg','text');e.setAttribute('x',x);e.setAttribute('y',y);e.setAttribute('font-size',fs);e.setAttribute('fill',c);e.setAttribute('font-family',fam);e.setAttribute('font-weight',w);e.setAttribute('text-anchor',anchor);e.textContent=t;svg.appendChild(e);}
+rect(200,120,500,230,'#F7EDDA','#79513C',1.0);
+rect(120,400,660,350,'#FDF7EA','#3F6472',1.0);
+rect(180,630,240,100,'#A8AE8B','#555E3C',0.75);
+rect(480,630,240,100,'#A8AE8B','#555E3C',0.75);
+arrow([[450, 76], [450, 120]],'#51463C');
+arrow([[450, 216], [450, 238], [285, 238], [285, 260]],'#51463C');
+arrow([[450, 216], [450, 260]],'#51463C');
+arrow([[450, 216], [450, 238], [615, 238], [615, 260]],'#51463C');
+arrow([[450, 350], [450, 400]],'#51463C');
+arrow([[330, 502], [330, 521], [430, 521], [430, 540]],'#51463C');
+arrow([[550, 502], [550, 521], [470, 521], [470, 540]],'#51463C');
+arrow([[450, 592], [450, 611], [300, 611], [300, 630]],'#51463C');
+arrow([[450, 592], [450, 611], [600, 611], [600, 630]],'#51463C');
+rect(360,20,180,56,'#EFCDB4','#C85A32',1.0);
+rect(380,160,140,56,'#C9D6DC','#3F6472',1.0);
+rect(220,260,130,56,'#C9D6DC','#3F6472',1.0);
+rect(385,260,130,56,'#C9D6DC','#3F6472',1.0);
+rect(550,260,130,56,'#C9D6DC','#3F6472',1.0);
+rect(260,450,140,52,'#C9D6DC','#3F6472',1.0);
+rect(480,450,140,52,'#C9D6DC','#3F6472',1.0);
+rect(350,540,200,52,'#EFCDB4','#C85A32',1.0);
+rect(200,668,200,48,'#EFCDB4','#C85A32',1.0);
+rect(500,668,200,48,'#EFCDB4','#C85A32',1.0);
+text(212,145.1,"Control plane",18,'#79513C',"'Karla', sans-serif",'600','start');
+text(132,425.1,"Node",18,'#3F6472',"'Karla', sans-serif",'600','start');
+text(192,653.2,"Pod: nginx",16,'#26211C',"'Karla', sans-serif",'600','start');
+text(492,653.2,"Pod: redis",16,'#26211C',"'Karla', sans-serif",'600','start');
+text(450.0,53.849999999999994,"kubectl",18,'#8F3D22',"'Courier Prime', monospace",'400','middle');
+text(450.0,193.2,"API server",16,'#26211C',"'Courier Prime', monospace",'400','middle');
+text(285.0,293.2,"etcd",16,'#26211C',"'Courier Prime', monospace",'400','middle');
+text(450.0,293.2,"scheduler",16,'#26211C',"'Courier Prime', monospace",'400','middle');
+text(615.0,283.8,"controller",14,'#26211C',"'Courier Prime', monospace",'400','middle');
+text(615.0,301.3,"manager",14,'#26211C',"'Courier Prime', monospace",'400','middle');
+text(330.0,481.2,"kubelet",16,'#26211C',"'Courier Prime', monospace",'400','middle');
+text(550.0,481.2,"kube-proxy",16,'#26211C',"'Courier Prime', monospace",'400','middle');
+text(450.0,571.2,"container runtime",16,'#8F3D22',"'Courier Prime', monospace",'400','middle');
+text(300.0,696.55,"container: nginx",14,'#8F3D22',"'Courier Prime', monospace",'400','middle');
+text(600.0,696.55,"container: redis",14,'#8F3D22',"'Courier Prime', monospace",'400','middle');
+</script></body></html>
