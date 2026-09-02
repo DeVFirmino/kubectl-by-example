@@ -5,7 +5,7 @@ description: Draw diagrams in Daniel's house style — Excalidraw-like hand-draw
 
 # Daniel diagram
 
-Repo copy of the `daniel-diagram` skill. Every diagram in this repo is produced with it, so the style stays consistent across sections.
+Repo copy of the `daniel-diagram` skill. Every diagram and terminal print in this repo is produced with it, so the style stays consistent across sections.
 
 Hand-drawn look (rough.js, same feel as Excalidraw) with the DanielSite paper palette and fonts. Output is a PNG ready for `wwwroot/img/posts/` or a repo `img/` folder.
 
@@ -59,5 +59,13 @@ Rules: terracotta is an accent, not a category; do not paint more than three foc
 - Arrows are polylines in the element's local coordinates; use right angles (`[0,0],[0,20],[dx,20],[dx,40]`). Arrowhead is added at the last point.
 - `anchor: "middle"` centres text on `x`; omit for left-aligned titles. Multi-line text uses `\n`.
 - When exporting the spec for real Excalidraw, the renderer's extra keys (`role`, `font`, `anchor`) are ignored by Excalidraw; add `backgroundColor`/`strokeColor` too if the `.excalidraw` must look right there (`render.py --bake` writes that copy).
+
+## Terminal prints
+
+Command output goes in a print that mirrors the site's article code block (`.article-code` in `paper.css`): bar `#2B2824` with the label in Courier Prime uppercase `#9C9184`, body `#23211E`, text `#E8DFD2` 15.5px/1.7, offset shadow `4px 4px 0 rgba(0,0,0,.15)`, Prism inks only: prompt and errors in `#E08A5E`/`#DE8B62`, good states in `#C9CFA4`. No window dots, no paper, no ruled lines, no hand-drawn border. Daniel rejected paper/torn-note and generic dark-terminal looks for prints: the print must be indistinguishable from a code block on the page.
+
+1. Save the real output to a `.txt` with prompt lines starting with `$ `.
+2. `python3 scripts/terminal.py out.txt out.html --label "bash · kind-ckad"`
+3. `scripts/capture.sh out.html out.png` (2x, cropped to content).
 
 See `examples/k8s-architecture.json` for the reference diagram (kubectl → control plane → node → pods).
