@@ -1,5 +1,5 @@
 $ kubectl get pods -o wide
-NAME    READY   STATUS             RESTARTS   AGE   IP           NODE                 NOMINATED NODE   READINESS GATES
-box     1/1     Running            0          40s   10.244.0.6   ckad-control-plane   <none>           <none>
-nginx   1/1     Running            0          40s   10.244.0.4   ckad-control-plane   <none>           <none>
-redis   0/1     ImagePullBackOff   0          40s   10.244.0.7   ckad-control-plane   <none>           <none>
+NAME    READY   STATUS             RESTARTS   AGE   IP           NODE
+box     1/1     Running            0          40s   10.244.0.6   ckad-control-plane
+nginx   1/1     Running            0          40s   10.244.0.4   ckad-control-plane
+redis   0/1     ImagePullBackOff   0          40s   10.244.0.7   ckad-control-plane
