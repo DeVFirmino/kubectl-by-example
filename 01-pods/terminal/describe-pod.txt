@@ -1,0 +1,25 @@
+$ kubectl describe pod redis
+Containers:
+  redis:
+    Container ID:   
+    Image:          redis123
+    Image ID:       
+    Port:           <none>
+    Host Port:      <none>
+    State:          Waiting
+      Reason:       ImagePullBackOff
+    Ready:          False
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-klkvc (ro)
+...
+Events:
+  Type     Reason     Age               From               Message
+  ----     ------     ----              ----               -------
+  Normal   Scheduled  40s               default-scheduler  Successfully assigned default/redis to ckad-control-plane
+  Normal   BackOff    20s               kubelet            Back-off pulling image "redis123"
+  Warning  Failed     20s               kubelet            Error: ImagePullBackOff
+  Normal   Pulling    6s (x2 over 40s)  kubelet            Pulling image "redis123"
+  Warning  Failed     5s (x2 over 20s)  kubelet            Failed to pull image "redis123": failed to pull and unpack image "docker.io/library/redis123:latest": failed to resolve reference "docker.io/library/redis123:latest": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed
+  Warning  Failed     5s (x2 over 20s)  kubelet            Error: ErrImagePull

@@ -1,0 +1,8 @@
+$ kubectl set image pod/redis redis=redis
+pod/redis image updated
+
+$ kubectl get pods
+NAME    READY   STATUS    RESTARTS   AGE
+box     1/1     Running   0          55s
+nginx   1/1     Running   0          55s
+redis   1/1     Running   0          55s
