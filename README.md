@@ -8,7 +8,7 @@ The sections follow the order of the [KodeKloud CKAD course](https://kodekloud.c
 
 | # | Topic | Blog post |
 |---|-------|-----------|
-| 01 | [Pods](01-pods/README.md) | _coming soon_ |
+| 01 | [Pods](01-pods/README.md) | [kubectl by example, part 1: pods](https://danieldias.dev/en/blog/kubectl-by-example-part-1-pods) |
 
 ## Reproducing the output
 
