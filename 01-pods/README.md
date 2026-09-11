@@ -78,7 +78,7 @@ kubectl delete pod nginx
 
 ## Things that bite
 
-- `kubectrl` is not a command. Aliases help: `alias k=kubectl`.
+- Typing `kubectl` a few hundred times is its own tax. `alias k=kubectl` pays for itself.
 - Angle brackets in `<name>` are placeholders. Typed literally, bash reads `<` as a redirect.
 - Flags need a space before them: `--image=nginx --dry-run=client`, not `--image=nginx--dry-run=client`.
 - `kubectl edit` drops you in `vi`. Know `:q!` before you need it.
