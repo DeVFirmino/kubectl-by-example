@@ -9,6 +9,7 @@ The sections follow the order of the [KodeKloud CKAD course](https://kodekloud.c
 | # | Topic | Blog post |
 |---|-------|-----------|
 | 01 | [Pods](01-pods/README.md) | [kubectl by example, part 1: pods](https://danieldias.dev/en/blog/kubectl-by-example-part-1-pods) |
+| 02 | [Imperative commands and services](02-imperative-commands-and-services/README.md) | [kubectl by example, part 2: imperative commands and services](https://danieldias.dev/en/blog/kubectl-by-example-part-2-imperative-commands-and-services) |
 
 ## Reproducing the output
 
