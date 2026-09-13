@@ -42,6 +42,8 @@ kubectl label pods redis tier-
 
 A Service finds its pods by label and nothing else, so changing the one a selector depends on removes those pods from the Service. See [`pod-with-label.yaml`](pod-with-label.yaml).
 
+![kubectl label: a missing resource type fails, an existing value is refused without --overwrite, and a trailing hyphen removes the label](img/labels.png)
+
 ## Expose a pod
 
 ```bash
@@ -60,6 +62,8 @@ The first creates both objects and generates matching labels and selector. The s
 
 So `create service clusterip web` finds the deployment's pods, and the same command would miss a pod created by `run`. When the selector matches nothing, `kubectl get endpoints <name>` returns `<none>`.
 
+![kubectl get endpoints: the Services from run --expose and from create deployment plus create service have pod addresses; the one from create service for a run pod has none](img/expose-and-selectors.png)
+
 ## Service types and ports
 
 `ClusterIP` is the default and is reachable only inside the cluster. `NodePort` also opens a fixed port on every node, by default in the 30000 to 32767 range, configurable with the API server's `--service-node-port-range`.
@@ -76,6 +80,8 @@ ports:
 `nodePort` and `port` are yours to choose. `targetPort` has to be the port the application actually listens on, or the name declared for it. Point it somewhere nothing is listening and the Service is still created without error, and requests never reach anything.
 
 The default `kubectl get services` table omits `targetPort`. Its `PORT(S)` column shows `port` plus the nodePort when allocated, as in `8080:30080/TCP`. Use `describe`, `-o yaml` or a custom output format for the rest.
+
+![kubectl get service showing 8080:30080/TCP, and describe showing Port, TargetPort, NodePort and Endpoints](img/service-ports.png)
 
 ## When no single command is enough
 
