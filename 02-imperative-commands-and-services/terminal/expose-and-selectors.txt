@@ -1,0 +1,15 @@
+$ kubectl run httpd --image=httpd:alpine --port=80 --expose
+service/httpd created
+pod/httpd created
+$ kubectl create deployment web --image=nginx
+deployment.apps/web created
+$ kubectl create service clusterip web --tcp=80:80
+service/web created
+$ kubectl create service clusterip httpd-by-create --tcp=80:80
+service/httpd-by-create created
+$ kubectl get endpoints httpd web httpd-by-create
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME              ENDPOINTS       AGE
+httpd             10.244.0.6:80   86s
+web               10.244.0.7:80   86s
+httpd-by-create   <none>          86s

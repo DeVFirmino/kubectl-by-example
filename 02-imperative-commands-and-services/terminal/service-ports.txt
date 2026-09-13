@@ -1,0 +1,10 @@
+$ kubectl create service nodeport web --tcp=8080:80 --node-port=30080
+service/web created
+$ kubectl get service web
+NAME   TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+web    NodePort   10.96.201.97   <none>        8080:30080/TCP   4s
+$ kubectl describe service web | grep -E "^(Port|TargetPort|NodePort|Endpoints)"
+Port:                     8080-80  8080/TCP
+TargetPort:               80/TCP
+NodePort:                 8080-80  30080/TCP
+Endpoints:                10.244.0.7:80
