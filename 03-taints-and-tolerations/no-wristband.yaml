@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: no-wristband
+  name: no-wristband
+spec:
+  containers:
+  - command:
+    - sleep
+    - "3600"
+    image: busybox:1.37.0
+    name: no-wristband
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}

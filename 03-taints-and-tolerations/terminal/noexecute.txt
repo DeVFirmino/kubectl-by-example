@@ -1,0 +1,16 @@
+$ kubectl taint nodes ckad-worker wristband=blue:NoSchedule-
+node/ckad-worker untainted
+$ kubectl get pods -o wide
+NAME             READY   STATUS    RESTARTS   AGE   IP           NODE
+blue-wristband   1/1     Running   0          18s   10.244.1.2   ckad-worker
+no-wristband     1/1     Running   0          18s   10.244.1.3   ckad-worker
+$ kubectl taint nodes ckad-worker wristband=blue:NoExecute
+node/ckad-worker tainted
+$ kubectl get pods
+NAME             READY   STATUS        RESTARTS   AGE
+blue-wristband   1/1     Terminating   0          26s
+no-wristband     1/1     Terminating   0          26s
+$ kubectl get events --field-selector reason=TaintManagerEviction
+LAST SEEN   TYPE     REASON                 OBJECT               MESSAGE
+8s          Normal   TaintManagerEviction   pod/blue-wristband   Marking for deletion Pod default/blue-wristband
+8s          Normal   TaintManagerEviction   pod/no-wristband     Marking for deletion Pod default/no-wristband
