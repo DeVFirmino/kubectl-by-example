@@ -1,0 +1,12 @@
+$ kubectl apply -f no-wristband.yaml -f blue-wristband.yaml
+pod/no-wristband created
+pod/blue-wristband created
+$ kubectl get pods -o wide
+NAME             READY   STATUS    RESTARTS   AGE   IP           NODE
+blue-wristband   1/1     Running   0          9s    10.244.1.2   ckad-worker
+no-wristband     0/1     Pending   0          9s    <none>       <none>
+$ kubectl describe pod no-wristband | grep -A3 Events
+Events:
+  Type     Reason            Age   From               Message
+  ----     ------            ----  ----               -------
+  Warning  FailedScheduling  9s    default-scheduler  0/2 nodes are available: 2 node(s) had untolerated taint(s). preemption: 0/2 nodes are available: 2 Preemption is not helpful for scheduling.

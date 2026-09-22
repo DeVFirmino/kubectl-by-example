@@ -1,0 +1,13 @@
+$ kubectl get nodes
+NAME                 STATUS   ROLES           AGE   VERSION
+ckad-control-plane   Ready    control-plane   27s   v1.37.0
+ckad-worker          Ready    <none>          12s   v1.37.0
+$ kubectl describe node ckad-control-plane | grep Taints
+Taints:             node-role.kubernetes.io/control-plane:NoSchedule
+$ kubectl taint nodes ckad-worker wristband=blue
+error: invalid taint spec: wristband=blue, name part must consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character (e.g. 'MyName',  or 'my.name',  or '123-abc', regex used for validation is '([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]')
+See 'kubectl taint -h' for help and examples
+$ kubectl taint nodes ckad-worker wristband=blue:NoSchedule
+node/ckad-worker tainted
+$ kubectl describe node ckad-worker | grep Taints
+Taints:             wristband=blue:NoSchedule
