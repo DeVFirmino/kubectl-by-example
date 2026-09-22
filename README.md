@@ -10,6 +10,7 @@ The sections follow the order of the [KodeKloud CKAD course](https://kodekloud.c
 |---|-------|-----------|
 | 01 | [Pods](01-pods/README.md) | [kubectl by example, part 1: pods](https://danieldias.dev/en/blog/kubectl-by-example-part-1-pods) |
 | 02 | [Imperative commands and services](02-imperative-commands-and-services/README.md) | [kubectl by example, part 2: imperative commands and services](https://danieldias.dev/en/blog/kubectl-by-example-part-2-imperative-commands-and-services) |
+| 03 | [Taints and tolerations](03-taints-and-tolerations/README.md) | [Kubernetes taints and tolerations explained with a theme park](https://danieldias.dev/en/blog/kubernetes-taints-and-tolerations) |
 
 ## Reproducing the output
 
@@ -20,6 +21,8 @@ kind create cluster --name ckad
 # run the commands from a section
 kind delete cluster --name ckad
 ```
+
+Section 03 needs a worker node, so it creates the cluster from [`03-taints-and-tolerations/kind.yaml`](03-taints-and-tolerations/kind.yaml).
 
 ## Diagrams
 
