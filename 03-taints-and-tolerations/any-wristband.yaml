@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: any-wristband
+  name: any-wristband
+spec:
+  containers:
+  - command:
+    - sleep
+    - "3600"
+    image: busybox:1.37.0
+    name: any-wristband
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  tolerations:
+  - key: wristband
+    operator: Exists
+status: {}

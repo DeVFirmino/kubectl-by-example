@@ -1,0 +1,9 @@
+$ kubectl apply -f any-wristband.yaml
+pod/any-wristband created
+$ kubectl get pods -o wide
+NAME            READY   STATUS    RESTARTS   AGE   IP           NODE
+any-wristband   1/1     Running   0          3s    10.244.1.4   ckad-worker
+$ kubectl taint nodes ckad-worker wristband-
+node/ckad-worker untainted
+$ kubectl describe node ckad-worker | grep Taints
+Taints:             <none>
