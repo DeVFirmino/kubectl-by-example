@@ -32,9 +32,9 @@
   {
    "type": "rectangle",
    "id": "pod1",
-   "x": 60,
+   "x": 48,
    "y": 648,
-   "width": 240,
+   "width": 264,
    "height": 108,
    "role": "group",
    "code": "pod/nginx"
@@ -42,9 +42,9 @@
   {
    "type": "rectangle",
    "id": "pod2",
-   "x": 356,
+   "x": 344,
    "y": 648,
-   "width": 240,
+   "width": 264,
    "height": 108,
    "role": "group",
    "code": "pod/redis"
