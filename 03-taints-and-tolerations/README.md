@@ -4,7 +4,7 @@ A taint on a node keeps pods away from it. A toleration on a pod lets that pod i
 
 The [blog post](https://danieldias.dev/en/blog/kubernetes-taints-and-tolerations) explains it with a theme park: the taint is a "blue wristbands only" sign on a ride, the toleration is the wristband.
 
-![A node has a blue-wristband taint. A pod without a matching toleration is blocked, while one with the toleration still needs to pass the scheduler's other checks.](img/diagram.png)
+![The node carries the taint wristband=blue:NoSchedule. The no-wristband pod has no toleration and stays Pending, and the blue-wristband pod tolerates the taint and runs.](img/diagram.png)
 
 This section needs a second node. [`kind.yaml`](kind.yaml) adds a worker next to the control plane:
 

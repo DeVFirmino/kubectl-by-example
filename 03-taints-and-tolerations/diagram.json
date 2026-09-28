@@ -1,0 +1,76 @@
+{
+ "type": "excalidraw",
+ "version": 2,
+ "source": "daniel-diagram",
+ "size": "video",
+ "style": "pencil",
+ "title": "A taint keeps Pods off a node unless they tolerate it",
+ "alt": "The node carries the taint wristband=blue:NoSchedule. The no-wristband pod has no toleration and stays Pending, and the blue-wristband pod tolerates the taint and runs.",
+ "elements": [
+  {
+   "type": "rectangle",
+   "id": "node",
+   "cx": 326,
+   "y": 24,
+   "width": 300,
+   "role": "component",
+   "label": "Node",
+   "sub": "wristband=blue:NoSchedule"
+  },
+  {
+   "type": "rectangle",
+   "id": "pod-a",
+   "x": 24,
+   "y": 124,
+   "width": 216,
+   "role": "component",
+   "code": "no-wristband",
+   "sub": "no toleration"
+  },
+  {
+   "type": "rectangle",
+   "id": "pod-b",
+   "x": 24,
+   "y": 224,
+   "width": 216,
+   "role": "component",
+   "code": "blue-wristband",
+   "sub": "wristband=blue"
+  },
+  {
+   "type": "rectangle",
+   "id": "res-a",
+   "x": 424,
+   "y": 124,
+   "width": 204,
+   "height": 68,
+   "role": "focal",
+   "code": "Pending"
+  },
+  {
+   "type": "rectangle",
+   "id": "res-b",
+   "x": 424,
+   "y": 224,
+   "width": 204,
+   "height": 68,
+   "role": "component",
+   "code": "Running"
+  },
+  {
+   "type": "arrow",
+   "id": "a1",
+   "from": "pod-a",
+   "to": "res-a",
+   "code": "not tolerated"
+  },
+  {
+   "type": "arrow",
+   "id": "a2",
+   "from": "pod-b",
+   "to": "res-b",
+   "accent": true,
+   "code": "tolerated"
+  }
+ ]
+}
