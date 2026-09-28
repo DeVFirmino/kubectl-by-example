@@ -870,7 +870,8 @@ const OPS={
   return rc.path(rr(x,y,w,h,pill?h/2:Math.min(4,w/2,h/2)),opt);},
  // a filter region is a share of the bounding box, and the box leaves the stroke out: a straight arrow's box is ~0px tall,
  // so its stroke got trimmed. A clear rect 6px past the box keeps the whole graphite line inside the region.
- filt(n,f,op){if(f==='graphite'){const b=n.getBBox(),r=document.createElementNS(NS,'rect');
+ // It needs the node on the page: off the page getBBox() is an empty box at 0,0, and the rect would stretch the group to it.
+ filt(n,f,op){if(f==='graphite'&&n.isConnected){const b=n.getBBox(),r=document.createElementNS(NS,'rect');
    Object.entries({x:b.x-6,y:b.y-6,width:b.width+12,height:b.height+12,fill:'none'}).forEach(([k,v])=>r.setAttribute(k,v));n.appendChild(r);}
   n.setAttribute('filter',`url(#${f})`);if(op!=null)n.setAttribute('opacity',op);return n;},
  pshape(type,x,y,w,h,base,pencil,stroke,d,pill,sh){const seed=Math.floor(x*7+y*13);
@@ -883,11 +884,11 @@ const OPS={
   add(rc.path(rr(x,y,w,h,4),{fill:base,fillStyle:'solid',stroke:'none',roughness:0.3,seed}));
   if(pencil)OPS.filt(add(rc.path(rr(x+3,y+3,w-6,h-6,4),{fill:pencil,fillStyle:'hachure',hachureGap:5,hachureAngle:-41,fillWeight:1,roughness:1.4,stroke:'none',seed:seed+3})),'grain',0.28);
   OPS.filt(add(rc.path(rr(x,y,w,h,4),{fill:'none',stroke,strokeWidth:2.4,roughness:0.6,bowing:0.4,seed:seed+5,...dash(d)})),'graphite');},
- pill(x,y,w,h,fill,stroke,sh,rot){const gg=document.createElementNS(NS,'g');if(rot)gg.setAttribute('transform',`rotate(${rot} ${x+w/2} ${y+h/2})`);
+ pill(x,y,w,h,fill,stroke,sh,rot){const gg=add(document.createElementNS(NS,'g'));if(rot)gg.setAttribute('transform',`rotate(${rot} ${x+w/2} ${y+h/2})`);
   const seed=Math.floor(x*3+y*5),put=n=>(gg.appendChild(n),n);
   if(sh)OPS.filt(put(rc.path(rr(x+sh,y+sh,w,h,h/2),{fill:stroke,fillStyle:'solid',stroke:'none',roughness:0.3,seed})),'grain',0.9);
   put(rc.path(rr(x,y,w,h,h/2),{fill,fillStyle:'solid',stroke:'none',roughness:0.3,seed}));
-  OPS.filt(put(rc.path(rr(x,y,w,h,h/2),{fill:'none',stroke,strokeWidth:1.8,roughness:0.5,seed:seed+1})),'graphite');add(gg);},
+  OPS.filt(put(rc.path(rr(x,y,w,h,h/2),{fill:'none',stroke,strokeWidth:1.8,roughness:0.5,seed:seed+1})),'graphite');},
  parrow(pts,stroke,d,head,seed){OPS.filt(add(rc.linearPath(pts,{stroke,strokeWidth:3,roughness:0.9,bowing:0.6,seed,...dash(d)})),'graphite');
   if(!head)return;const [a,b]=[pts[pts.length-2],pts[pts.length-1]],ang=Math.atan2(b[1]-a[1],b[0]-a[0]),L=14,W=8;
   const p1=[b[0]-L*Math.cos(ang)+W*Math.sin(ang),b[1]-L*Math.sin(ang)-W*Math.cos(ang)],p2=[b[0]-L*Math.cos(ang)-W*Math.sin(ang),b[1]-L*Math.sin(ang)+W*Math.cos(ang)];
