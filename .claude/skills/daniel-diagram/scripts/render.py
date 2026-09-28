@@ -122,6 +122,10 @@ def inside(p, r, m=0): return r[0] - m <= p[0] <= r[2] + m and r[1] - m <= p[1] 
 def hit(a, b, m=0): return a[0] < b[2] - m and b[0] < a[2] - m and a[1] < b[3] - m and b[1] < a[3] - m
 def r4(v): return int(round(v / 4) * 4)
 
+def air(r, gap=8):
+    """r grown so that seg_hits_rect (which shrinks by 2px) catches a line passing within gap px of it."""
+    return (r[0] - gap - 2, r[1] - gap - 2, r[2] + gap + 2, r[3] + gap + 2)
+
 def seg_hits_rect(p, q, r):
     """Axis-aligned segment p-q crosses the interior of r (shrunk 2px)."""
     x0, y0, x1, y1 = r[0] + 2, r[1] + 2, r[2] - 2, r[3] - 2
@@ -473,9 +477,13 @@ def main():
                     warn(f"{a['id']}: runs along the border of {z['id']} - move it (mid) into open space")
                 if "_title" in z and seg_hits_rect(p, q, z["_title"]):
                     fail(f"{a['id']}: runs under the title of {z['id']} - reroute (mid) or move the title")
+                elif "_title" in z and seg_hits_rect(p, q, air(z["_title"])):
+                    warn(f"{a['id']}: grazes the title of {z['id']} - give it 8px of air (move the boxes, or mid)")
             for r, what in tile_names:
                 if seg_hits_rect(p, q, r):
                     fail(f"{a['id']}: runs through the name of {what.split()[0]} - reroute (mid) or aim at the side of the grid")
+                elif seg_hits_rect(p, q, air(r)):
+                    warn(f"{a['id']}: grazes the name of {what.split()[0]} - give it 8px of air")
 
     # -- arrow checks: through boxes, shared strokes, crossings (hops)
     def ends(a):
