@@ -35,5 +35,6 @@ body{{margin:0;background:#EEDFC7;padding:6px 10px 10px 6px;display:inline-block
 .right{{font:700 13.5px 'Courier Prime',monospace;letter-spacing:.14em;text-transform:uppercase;color:#E08A5E}}
 pre{{margin:0;padding:22px 18px 22px 22px;background:#23211E;border:1px solid #3A3530;border-radius:0 0 4px 4px;font:{a.font}px/1.7 'Courier Prime',monospace;color:#E8DFD2;white-space:pre-wrap;word-break:normal;overflow-wrap:break-word;tab-size:4}}
 .p{{color:#E08A5E;font-weight:700}}.c{{color:#E8DFD2}}.err{{color:#DE8B62;font-weight:700}}.ok{{color:#C9CFA4}}
-</style><div class="code"><div class="bar"><span class="name">{html.escape(a.label)}</span><span class="right">{html.escape(a.right)}</span></div><pre>{chr(10).join(lines)}</pre></div>''')
+</style><div class="code"><div class="bar"><span class="name">{html.escape(a.label)}</span><span class="right">{html.escape(a.right)}</span></div><pre>{chr(10).join(lines)}</pre></div>
+<script>document.fonts.load("400 12px 'Courier Prime'").then(f=>document.body.setAttribute('data-drawn',f.length?'ok':'font-fallback'))</script>''')
 print(f"wrote {a.out}")
