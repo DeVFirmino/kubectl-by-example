@@ -65,6 +65,7 @@ def bump(fam, w):
     return {"sans": 800, "mono": 700, "slab": 700}.get(fam, w)
 
 KEPT = set()                           # id(op) of free text whose spec set fontWeight: pencil leaves that weight alone
+PART = {}                              # id(op) -> a box line's own name (s1:label, s1:code), which its owner s1 doesn't give
 OWN = {}                               # id(op) -> the element that drew it ("s1", "s1:sub", "a1:label"): daniel-video animates by it
 def tag(op, oid):
     OWN[id(op)] = oid
@@ -364,8 +365,10 @@ def main():
                 pw = min(text_w(t, "mono", w, fs) + 20, (x1 - x0) - 12)
                 scene_mask.append(tag(["pill", cx - pw / 2, top - 1, pw, fs * 1.3 + 3, "#FFF9F1", INK, 2, 0], e["id"] + ":sub"))
                 c = INK
-            scene_text.append(tag(["text", cx, top + fs * 0.65, t, fs, c, "mono" if mono else "sans", w, "middle", "central", 0],
-                                  e["id"] + (":sub" if part == "sub" else "")))
+            op = tag(["text", cx, top + fs * 0.65, t, fs, c, "mono" if mono else "sans", w, "middle", "central", 0],
+                     e["id"] + (":sub" if part == "sub" else ""))
+            if part == "main": PART[id(op)] = e["id"] + (":code" if mono else ":label")
+            scene_text.append(op)
             top += fs * 1.3; prev = part
         bw = max(text_w(t, m, w, s) for t, m, w, s, _, _ in e["_block"])
         texts.append(((cx - bw / 2, cy - e["_bh"] / 2, cx + bw / 2, cy + e["_bh"] / 2), f"{e['id']} text"))
@@ -470,6 +473,9 @@ def main():
                     warn(f"{a['id']}: runs along the border of {z['id']} - move it (mid) into open space")
                 if "_title" in z and seg_hits_rect(p, q, z["_title"]):
                     fail(f"{a['id']}: runs under the title of {z['id']} - reroute (mid) or move the title")
+            for r, what in tile_names:
+                if seg_hits_rect(p, q, r):
+                    fail(f"{a['id']}: runs through the name of {what.split()[0]} - reroute (mid) or aim at the side of the grid")
 
     # -- arrow checks: through boxes, shared strokes, crossings (hops)
     def ends(a):
@@ -714,14 +720,14 @@ def main():
             tw = text_w(item["text"], "sans", 400, 14)
             if "box" in item:
                 f, st_, _ = ROLES[item["box"]]
-                scene_legend.append(["shape", "rectangle", lx, ly - 8, 28, 16, f, st_, 1, item["box"] == "external", 1.5, 0.6, False])
+                scene_legend.append(tag(["shape", "rectangle", lx, ly - 8, 28, 16, f, st_, 1, item["box"] == "external", 1.5, 0.6, False], "legend"))
             else:
                 kind = item.get("line", "solid")
-                scene_legend.append(["arrow", [[lx, ly], [lx + 28, ly]], ACCENT if kind == "accent" else ARROW, kind == "dashed", True, int(lx)])
-            scene_legend.append(["text", lx + 38, ly, item["text"], 14, MUTED, "sans", 400, "start", "central", 0])
+                scene_legend.append(tag(["arrow", [[lx, ly], [lx + 28, ly]], ACCENT if kind == "accent" else ARROW, kind == "dashed", True, int(lx)], "legend"))
+            scene_legend.append(tag(["text", lx + 38, ly, item["text"], 14, MUTED, "sans", 400, "start", "central", 0], "legend"))
             lx += 38 + tw + 28
         maxx = max(maxx, lx - 28)
-        scene_legend.insert(0, ["rule", minx, ly - 14, maxx, ly - 14])
+        scene_legend.insert(0, tag(["rule", minx, ly - 14, maxx, ly - 14], "legend"))
         maxy = ly + 12
     cw, ch = maxx - minx, maxy - miny
     W = PRESETS[preset]
@@ -800,7 +806,8 @@ def main():
     if bake: write_bake(bake, scene)
     if scene_out:
         json.dump({"width": sw, "height": sh, "dx": round(dx, 1), "dy": round(dy, 1), "style": style, "pencil": PENCIL,
-                   "ops": scene, "owners": [OWN.get(id(op)) for op in scene]}, open(scene_out, "w"))
+                   "ops": scene, "owners": [OWN.get(id(op)) for op in scene], "parts": [PART.get(id(op)) for op in scene]},
+                  open(scene_out, "w"))
     print(f"wrote {out}")
 
 PAGE = """<!DOCTYPE html><html><head><meta charset="utf-8"><title>{TITLE}</title>
@@ -840,7 +847,7 @@ const OPS={
  arrow(pts,stroke,d,head,seed){add(rc.linearPath(pts,{stroke,strokeWidth:2,roughness:1,seed,...dash(d)}));
   if(!head)return;const [a,b]=[pts[pts.length-2],pts[pts.length-1]],ang=Math.atan2(b[1]-a[1],b[0]-a[0]),L=12,W=6;
   const p1=[b[0]-L*Math.cos(ang)+W*Math.sin(ang),b[1]-L*Math.sin(ang)-W*Math.cos(ang)],p2=[b[0]-L*Math.cos(ang)-W*Math.sin(ang),b[1]-L*Math.sin(ang)+W*Math.cos(ang)];
-  add(rc.linearPath([p1,b,p2],{stroke,strokeWidth:2,roughness:0.8,seed:seed+1}));},
+  add(rc.linearPath([p1,b,p2],{stroke,strokeWidth:2,roughness:0.8,seed:seed+1})).setAttribute('data-head','');},
  mask(x,y,w,h,fill){const r=document.createElementNS(NS,'rect');Object.entries({x,y,width:w,height:h,rx:3,fill}).forEach(([k,v])=>r.setAttribute(k,v));add(r);},
  text(x,y,t,fs,c,fam,w,anchor,base,ls,rot){const e=document.createElementNS(NS,'text');
   Object.entries({x,y,'font-size':fs,fill:c,'font-family':FAM[fam],'font-weight':w,'text-anchor':anchor}).forEach(([k,v])=>e.setAttribute(k,v));
@@ -853,7 +860,11 @@ const OPS={
   if(type==='cylinder'){const ry=Math.min(10,h*.18),rx=w/2;
     return rc.path(`M${x},${y+ry} V${y+h-ry} A${rx},${ry} 0 0 0 ${x+w},${y+h-ry} V${y+ry} A${rx},${ry} 0 0 0 ${x},${y+ry} A${rx},${ry} 0 0 0 ${x+w},${y+ry}`,opt);}
   return rc.path(rr(x,y,w,h,pill?h/2:Math.min(4,w/2,h/2)),opt);},
- filt(n,f,op){n.setAttribute('filter',`url(#${f})`);if(op!=null)n.setAttribute('opacity',op);return n;},
+ // a filter region is a share of the bounding box, and the box leaves the stroke out: a straight arrow's box is ~0px tall,
+ // so its stroke got trimmed. A clear rect 6px past the box keeps the whole graphite line inside the region.
+ filt(n,f,op){if(f==='graphite'){const b=n.getBBox(),r=document.createElementNS(NS,'rect');
+   Object.entries({x:b.x-6,y:b.y-6,width:b.width+12,height:b.height+12,fill:'none'}).forEach(([k,v])=>r.setAttribute(k,v));n.appendChild(r);}
+  n.setAttribute('filter',`url(#${f})`);if(op!=null)n.setAttribute('opacity',op);return n;},
  pshape(type,x,y,w,h,base,pencil,stroke,d,pill,sh){const seed=Math.floor(x*7+y*13);
   if(sh)OPS.filt(add(OPS.pgeom(type,x+sh,y+sh,w,h,pill,{fill:stroke,fillStyle:'solid',stroke:'none',roughness:0.5,seed})),'grain',0.92);
   add(OPS.pgeom(type,x,y,w,h,pill,{fill:base,fillStyle:'solid',stroke:'none',roughness:0.4,seed}));
@@ -872,7 +883,7 @@ const OPS={
  parrow(pts,stroke,d,head,seed){OPS.filt(add(rc.linearPath(pts,{stroke,strokeWidth:3,roughness:0.9,bowing:0.6,seed,...dash(d)})),'graphite');
   if(!head)return;const [a,b]=[pts[pts.length-2],pts[pts.length-1]],ang=Math.atan2(b[1]-a[1],b[0]-a[0]),L=14,W=8;
   const p1=[b[0]-L*Math.cos(ang)+W*Math.sin(ang),b[1]-L*Math.sin(ang)-W*Math.cos(ang)],p2=[b[0]-L*Math.cos(ang)-W*Math.sin(ang),b[1]-L*Math.sin(ang)+W*Math.cos(ang)];
-  OPS.filt(add(rc.linearPath([p1,b,p2],{stroke,strokeWidth:3,roughness:0.6,seed:seed+1,disableMultiStroke:true})),'graphite');},
+  OPS.filt(add(rc.linearPath([p1,b,p2],{stroke,strokeWidth:3,roughness:0.6,seed:seed+1,disableMultiStroke:true})),'graphite').setAttribute('data-head','');},
  pframe(x,y,w,h,tw,th,split){const o={stroke:'#26211C',strokeWidth:2,roughness:0.6,bowing:0.4,seed:Math.floor(x+y*3)};
   OPS.filt(add(rc.path(rr(x,y,w,h,4),o)),'graphite');OPS.filt(add(rc.linearPath([[x,y+th],[x+tw-6,y+th],[x+tw,y+th-6],[x+tw,y]],o)),'graphite');
   if(split)OPS.filt(add(rc.line(x+8,split,x+w-8,split,{...o,strokeWidth:1.6,strokeLineDash:[7,6],disableMultiStroke:true})),'graphite');},
