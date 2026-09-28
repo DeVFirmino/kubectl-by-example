@@ -1,41 +1,100 @@
-<!DOCTYPE html><html><head><meta charset="utf-8">
-<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>A taint keeps Pods off a node unless they tolerate it</title>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;600;800&family=Courier+Prime:wght@400;700&family=Zilla+Slab:ital,wght@0,600;0,700;1,400&display=block" rel="stylesheet">
 <script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
 <style>body{margin:0;background:#FBF4E6} svg{display:block}</style></head><body>
-<svg id="s" xmlns="http://www.w3.org/2000/svg" width="676" height="674" viewBox="0 0 676 674"><rect width="100%" height="100%" fill="#FBF4E6"/></svg>
+<svg id="s" xmlns="http://www.w3.org/2000/svg" width="660" height="371" viewBox="0 0 660 371" role="img" aria-labelledby="diagram-source-title diagram-source-desc" data-exact="1">
+<title id="diagram-source-title">A taint keeps Pods off a node unless they tolerate it</title><desc id="diagram-source-desc">The node carries the taint wristband=blue:NoSchedule. The no-wristband pod has no toleration and stays Pending, and the blue-wristband pod tolerates the taint and runs.</desc>
+<defs><!--DEFS-->
+ <filter id="grain" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="1.15" numOctaves="2" seed="7" result="n"/>
+  <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.75" result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/></filter>
+ <filter id="graphite" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="3" result="w"/>
+  <feDisplacementMap in="SourceGraphic" in2="w" scale="1.8" xChannelSelector="R" yChannelSelector="G" result="d"/>
+  <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="1" seed="11" result="n"/>
+  <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.5 1.6" result="a"/><feComposite in="d" in2="a" operator="in"/></filter>
+ <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#E6CFA3"/></pattern>
+<!--/DEFS--></defs>
+<rect width="100%" height="100%" fill="#FBF4E6"/><rect width="100%" height="100%" fill="url(#dots)"/><g id="g" transform="translate(4.0,27.5)"></g></svg>
 <script>
-const svg=document.getElementById('s'); const rc=rough.svg(svg);
+const SCENE=[["parrow", [[240, 160], [424, 160]], "#26211C", false, true, 880], ["parrow", [[240, 256], [424, 256]], "#C85A32", false, true, 976], ["pshape", "rectangle", 176.0, 24, 300, 68, "#DCE4E8", "#46708D", "#26211C", false, false, 6], ["pshape", "rectangle", 24, 124, 216, 68, "#DCE4E8", "#46708D", "#26211C", false, false, 6], ["pshape", "rectangle", 24, 224, 216, 68, "#DCE4E8", "#46708D", "#26211C", false, false, 6], ["pshape", "rectangle", 424, 124, 204, 68, "#F3E7D0", "#C85A32", "#26211C", false, false, 6], ["pshape", "rectangle", 424, 224, 204, 68, "#DCE4E8", "#46708D", "#26211C", false, false, 6], ["pill", 214.81591796875, 60.625, 222.3681640625, 20.55, "#FFF9F1", "#26211C", 2, 0], ["pill", 69.38427734375, 160.625, 125.2314453125, 20.55, "#FFF9F1", "#26211C", 2, 0], ["pill", 65.3369140625, 260.625, 133.326171875, 20.55, "#FFF9F1", "#26211C", 2, 0], ["pill", 272.3330078125, 132.1, 119.333984375, 22.900000000000006, "#FFF9F1", "#26211C", 3, 0], ["pill", 287.9228515625, 228.1, 88.154296875, 22.900000000000006, "#EFCDB4", "#26211C", 3, -4], ["text", 326.0, 47.225, "Node", 16, "#26211C", "sans", 800, "middle", "central", 0], ["text", 326.0, 70.4, "wristband=blue:NoSchedule", 13.5, "#26211C", "mono", 700, "middle", "central", 0], ["text", 132.0, 147.225, "no-wristband", 16, "#26211C", "mono", 700, "middle", "central", 0], ["text", 132.0, 170.4, "no toleration", 13.5, "#26211C", "mono", 700, "middle", "central", 0], ["text", 132.0, 247.225, "blue-wristband", 16, "#26211C", "mono", 700, "middle", "central", 0], ["text", 132.0, 270.4, "wristband=blue", 13.5, "#26211C", "mono", 700, "middle", "central", 0], ["text", 526.0, 158.0, "Pending", 16, "#26211C", "mono", 700, "middle", "central", 0], ["text", 526.0, 258.0, "Running", 16, "#26211C", "mono", 700, "middle", "central", 0], ["text", 332.0, 143.54999999999998, "not tolerated", 13, "#26211C", "mono", 700, "middle", "central", 0], ["text", 332.0, 239.54999999999998, "tolerated", 13, "#26211C", "mono", 700, "middle", "central", 0, -4]];
+const svg=document.getElementById('s'), g=document.getElementById('g'), rc=rough.svg(svg), NS='http://www.w3.org/2000/svg';
+let TARGET=g;
+/*OPS*/const FAM={sans:"'Karla', sans-serif",mono:"'Courier Prime', monospace",slab:"'Zilla Slab', serif",slabi:"'Zilla Slab', serif"};
+const add=n=>(TARGET.appendChild(n),n);
+const dash=d=>d?{strokeLineDash:[8,6],disableMultiStroke:true}:{};
 const rr=(x,y,w,h,r)=>`M${x+r},${y} h${w-2*r} a${r},${r} 0 0 1 ${r},${r} v${h-2*r} a${r},${r} 0 0 1 -${r},${r} h-${w-2*r} a${r},${r} 0 0 1 -${r},-${r} v-${h-2*r} a${r},${r} 0 0 1 ${r},-${r} z`;
-function rect(x,y,w,h,fill,stroke,op){const g=rc.path(rr(x,y,w,h,12),{fill,stroke,strokeWidth:2,fillStyle:'solid',roughness:1.2,bowing:1,seed:Math.floor(x*7+y*13)});g.setAttribute('opacity',op);svg.appendChild(g);}
-function arrow(pts,stroke){svg.appendChild(rc.linearPath(pts,{stroke,strokeWidth:2,roughness:1,seed:Math.floor(pts[0][0]*3+pts[0][1])}));
- const [a,b]=[pts[pts.length-2],pts[pts.length-1]];const ang=Math.atan2(b[1]-a[1],b[0]-a[0]);const L=12,W=6;
- const p1=[b[0]-L*Math.cos(ang)+W*Math.sin(ang),b[1]-L*Math.sin(ang)-W*Math.cos(ang)];const p2=[b[0]-L*Math.cos(ang)-W*Math.sin(ang),b[1]-L*Math.sin(ang)+W*Math.cos(ang)];
- svg.appendChild(rc.linearPath([p1,b,p2],{stroke,strokeWidth:2,roughness:0.8}));}
-function text(x,y,t,fs,c,fam,w,anchor){const e=document.createElementNS('http://www.w3.org/2000/svg','text');e.setAttribute('x',x);e.setAttribute('y',y);e.setAttribute('font-size',fs);e.setAttribute('fill',c);e.setAttribute('font-family',fam);e.setAttribute('font-weight',w);e.setAttribute('text-anchor',anchor);e.textContent=t;svg.appendChild(e);}
-rect(24,112,612,144,'#F7EDDA','#79513C',1.0);
-arrow([[258, 334], [382, 334]],'#51463C');
-arrow([[258, 474], [382, 474]],'#51463C');
-rect(146,163,368,68,'#C9D6DC','#3F6472',1.0);
-rect(24,290,232,88,'#FDF7EA','#3F6472',1.0);
-rect(384,290,252,88,'#EFCDB4','#C85A32',1.0);
-rect(24,430,232,88,'#C9D6DC','#3F6472',1.0);
-rect(384,430,252,88,'#A8AE8B','#555E3C',0.75);
-text(330,49.65,"A wristband allows entry",27,'#26211C',"'Karla', sans-serif",'600','middle');
-text(330,81.0,"It does not reserve a seat.",20,'#26211C',"'Karla', sans-serif",'400','middle');
-text(330,143.1,"Node = ride",18,'#79513C',"'Karla', sans-serif",'600','middle');
-text(330,191.0,"Blue wristbands only",20,'#26211C',"'Karla', sans-serif",'600','middle');
-text(330,217.2,"wristband=blue:NoSchedule",16,'#26211C',"'Courier Prime', monospace",'400','middle');
-text(140,323.1,"No blue wristband",18,'#26211C',"'Karla', sans-serif",'600','middle');
-text(140,352.3,"Pod: no matching",14,'#3F6472',"'Courier Prime', monospace",'400','middle');
-text(140,369.8,"toleration",14,'#3F6472',"'Courier Prime', monospace",'400','middle');
-text(510,323.1,"Cannot use this node",18,'#26211C',"'Karla', sans-serif",'600','middle');
-text(510,353.3,"Blocked by this taint",14,'#8F3D22',"'Courier Prime', monospace",'400','middle');
-text(140,463.1,"Blue wristband",18,'#26211C',"'Karla', sans-serif",'600','middle');
-text(140,492.3,"Pod: matching",14,'#26211C',"'Courier Prime', monospace",'400','middle');
-text(140,509.8,"toleration",14,'#26211C',"'Courier Prime', monospace",'400','middle');
-text(510,463.1,"May use this node",18,'#26211C',"'Karla', sans-serif",'600','middle');
-text(510,493.3,"Other checks still apply",14,'#26211C',"'Courier Prime', monospace",'400','middle');
-text(330,577.0,"The scheduler chooses where the Pod goes.",20,'#26211C',"'Karla', sans-serif",'600','middle');
-text(330,605.2,"It checks space and other rules. A Pod with the wristband",16,'#26211C',"'Karla', sans-serif",'400','middle');
-text(330,625.2,"can also use a node without this taint.",16,'#26211C',"'Karla', sans-serif",'400','middle');
+const OPS={
+ shape(type,x,y,w,h,fill,stroke,op,d,sw,rough_,pill){
+  const o={fill,stroke,strokeWidth:sw,fillStyle:'solid',roughness:rough_,bowing:1,seed:Math.floor(x*7+y*13),...dash(d)};
+  const draw=opt=>{
+   if(type==='diamond') return rc.polygon([[x+w/2,y],[x+w,y+h/2],[x+w/2,y+h],[x,y+h/2]],opt);
+   if(type==='ellipse') return rc.ellipse(x+w/2,y+h/2,w,h,opt);
+   if(type==='cylinder'){const ry=Math.min(10,h*.18),rx=w/2;
+     return rc.path(`M${x},${y+ry} V${y+h-ry} A${rx},${ry} 0 0 0 ${x+w},${y+h-ry} V${y+ry} A${rx},${ry} 0 0 0 ${x},${y+ry} A${rx},${ry} 0 0 0 ${x+w},${y+ry}`,opt);}
+   return rc.path(rr(x,y,w,h,pill?h/2:Math.min(12,w/2,h/2)),opt);};
+  add(draw(o)).setAttribute('opacity',op);},
+ arrow(pts,stroke,d,head,seed){add(rc.linearPath(pts,{stroke,strokeWidth:2,roughness:1,seed,...dash(d)}));
+  if(!head)return;const [a,b]=[pts[pts.length-2],pts[pts.length-1]],ang=Math.atan2(b[1]-a[1],b[0]-a[0]),L=12,W=6;
+  const p1=[b[0]-L*Math.cos(ang)+W*Math.sin(ang),b[1]-L*Math.sin(ang)-W*Math.cos(ang)],p2=[b[0]-L*Math.cos(ang)-W*Math.sin(ang),b[1]-L*Math.sin(ang)+W*Math.cos(ang)];
+  add(rc.linearPath([p1,b,p2],{stroke,strokeWidth:2,roughness:0.8,seed:seed+1})).setAttribute('data-head','');},
+ mask(x,y,w,h,fill){const r=document.createElementNS(NS,'rect');Object.entries({x,y,width:w,height:h,rx:3,fill}).forEach(([k,v])=>r.setAttribute(k,v));add(r);},
+ text(x,y,t,fs,c,fam,w,anchor,base,ls,rot){const e=document.createElementNS(NS,'text');
+  Object.entries({x,y,'font-size':fs,fill:c,'font-family':FAM[fam],'font-weight':w,'text-anchor':anchor}).forEach(([k,v])=>e.setAttribute(k,v));
+  if(base)e.setAttribute('dominant-baseline',base);if(ls)e.setAttribute('letter-spacing',ls+'em');if(fam==='slabi')e.setAttribute('font-style','italic');
+  if(rot)e.setAttribute('transform',`rotate(${rot} ${x} ${y})`);e.textContent=t;add(e);},
+ // ---- pencil style: hard graphite shadow, paper base, coloured-pencil hatch, graphite outline
+ pgeom(type,x,y,w,h,pill,opt){
+  if(type==='diamond') return rc.polygon([[x+w/2,y],[x+w,y+h/2],[x+w/2,y+h],[x,y+h/2]],opt);
+  if(type==='ellipse') return rc.ellipse(x+w/2,y+h/2,w,h,opt);
+  if(type==='cylinder'){const ry=Math.min(10,h*.18),rx=w/2;
+    return rc.path(`M${x},${y+ry} V${y+h-ry} A${rx},${ry} 0 0 0 ${x+w},${y+h-ry} V${y+ry} A${rx},${ry} 0 0 0 ${x},${y+ry} A${rx},${ry} 0 0 0 ${x+w},${y+ry}`,opt);}
+  return rc.path(rr(x,y,w,h,pill?h/2:Math.min(4,w/2,h/2)),opt);},
+ // a filter region is a share of the bounding box, and the box leaves the stroke out: a straight arrow's box is ~0px tall,
+ // so its stroke got trimmed. A clear rect 6px past the box keeps the whole graphite line inside the region.
+ filt(n,f,op){if(f==='graphite'){const b=n.getBBox(),r=document.createElementNS(NS,'rect');
+   Object.entries({x:b.x-6,y:b.y-6,width:b.width+12,height:b.height+12,fill:'none'}).forEach(([k,v])=>r.setAttribute(k,v));n.appendChild(r);}
+  n.setAttribute('filter',`url(#${f})`);if(op!=null)n.setAttribute('opacity',op);return n;},
+ pshape(type,x,y,w,h,base,pencil,stroke,d,pill,sh){const seed=Math.floor(x*7+y*13);
+  if(sh)OPS.filt(add(OPS.pgeom(type,x+sh,y+sh,w,h,pill,{fill:stroke,fillStyle:'solid',stroke:'none',roughness:0.5,seed})),'grain',0.92);
+  add(OPS.pgeom(type,x,y,w,h,pill,{fill:base,fillStyle:'solid',stroke:'none',roughness:0.4,seed}));
+  if(pencil)OPS.filt(add(OPS.pgeom(type,x+2,y+2,w-4,h-4,pill,{fill:pencil,fillStyle:'hachure',hachureGap:3.2,hachureAngle:-41,fillWeight:1.3,roughness:1.6,stroke:'none',seed:seed+3})),'grain',0.62);
+  OPS.filt(add(OPS.pgeom(type,x,y,w,h,pill,{fill:'none',stroke,strokeWidth:2.6,roughness:0.8,bowing:0.5,seed:seed+5,...dash(d)})),'graphite');},
+ pzone(x,y,w,h,base,stroke,d,pencil,sh){const seed=Math.floor(x*5+y*11);
+  OPS.filt(add(rc.path(rr(x+sh,y+sh,w,h,4),{fill:stroke,fillStyle:'solid',stroke:'none',roughness:0.4,seed})),'grain',0.9);
+  add(rc.path(rr(x,y,w,h,4),{fill:base,fillStyle:'solid',stroke:'none',roughness:0.3,seed}));
+  if(pencil)OPS.filt(add(rc.path(rr(x+3,y+3,w-6,h-6,4),{fill:pencil,fillStyle:'hachure',hachureGap:5,hachureAngle:-41,fillWeight:1,roughness:1.4,stroke:'none',seed:seed+3})),'grain',0.28);
+  OPS.filt(add(rc.path(rr(x,y,w,h,4),{fill:'none',stroke,strokeWidth:2.4,roughness:0.6,bowing:0.4,seed:seed+5,...dash(d)})),'graphite');},
+ pill(x,y,w,h,fill,stroke,sh,rot){const gg=document.createElementNS(NS,'g');if(rot)gg.setAttribute('transform',`rotate(${rot} ${x+w/2} ${y+h/2})`);
+  const seed=Math.floor(x*3+y*5),put=n=>(gg.appendChild(n),n);
+  if(sh)OPS.filt(put(rc.path(rr(x+sh,y+sh,w,h,h/2),{fill:stroke,fillStyle:'solid',stroke:'none',roughness:0.3,seed})),'grain',0.9);
+  put(rc.path(rr(x,y,w,h,h/2),{fill,fillStyle:'solid',stroke:'none',roughness:0.3,seed}));
+  OPS.filt(put(rc.path(rr(x,y,w,h,h/2),{fill:'none',stroke,strokeWidth:1.8,roughness:0.5,seed:seed+1})),'graphite');add(gg);},
+ parrow(pts,stroke,d,head,seed){OPS.filt(add(rc.linearPath(pts,{stroke,strokeWidth:3,roughness:0.9,bowing:0.6,seed,...dash(d)})),'graphite');
+  if(!head)return;const [a,b]=[pts[pts.length-2],pts[pts.length-1]],ang=Math.atan2(b[1]-a[1],b[0]-a[0]),L=14,W=8;
+  const p1=[b[0]-L*Math.cos(ang)+W*Math.sin(ang),b[1]-L*Math.sin(ang)-W*Math.cos(ang)],p2=[b[0]-L*Math.cos(ang)-W*Math.sin(ang),b[1]-L*Math.sin(ang)+W*Math.cos(ang)];
+  OPS.filt(add(rc.linearPath([p1,b,p2],{stroke,strokeWidth:3,roughness:0.6,seed:seed+1,disableMultiStroke:true})),'graphite').setAttribute('data-head','');},
+ pframe(x,y,w,h,tw,th,split){const o={stroke:'#26211C',strokeWidth:2,roughness:0.6,bowing:0.4,seed:Math.floor(x+y*3)};
+  OPS.filt(add(rc.path(rr(x,y,w,h,4),o)),'graphite');OPS.filt(add(rc.linearPath([[x,y+th],[x+tw-6,y+th],[x+tw,y+th-6],[x+tw,y]],o)),'graphite');
+  if(split)OPS.filt(add(rc.line(x+8,split,x+w-8,split,{...o,strokeWidth:1.6,strokeLineDash:[7,6],disableMultiStroke:true})),'graphite');},
+ pstep(x,y,n){const seed=Math.floor(x+y);
+  OPS.filt(add(rc.circle(x+2,y+2,24,{fill:'#26211C',fillStyle:'solid',stroke:'none',roughness:0.4,seed})),'grain',0.9);
+  add(rc.circle(x,y,24,{fill:'#C85A32',fillStyle:'solid',stroke:'none',roughness:0.4,seed}));
+  OPS.filt(add(rc.circle(x,y,24,{fill:'none',stroke:'#26211C',strokeWidth:2,roughness:0.5,seed:seed+1})),'graphite');
+  OPS.text(x,y+0.5,n,13,'#FFF9F1','mono',700,'middle','central',0);},
+ tiles(x,y,list,sh){for(const [dx,dy,s,base,pencil,ink,t] of list){OPS.pshape('rectangle',x+dx,y+dy,s,s,base,pencil,ink,false,false,sh);
+  if(t)OPS.text(x+dx+s/2,y+dy+s/2+0.5,t,16,ink,'mono',700,'middle','central',0);}},
+ step(x,y,n){add(rc.circle(x,y,22,{fill:'#A84A28',fillStyle:'solid',stroke:'#A84A28',strokeWidth:1.5,roughness:0.6,seed:Math.floor(x+y)}));
+  OPS.text(x,y+0.5,n,13,'#FFF9F1','mono',700,'middle','central',0);},
+ leader(d){add(rc.path(d,{stroke:'#8F3D22',strokeWidth:1.5,roughness:0.8,strokeLineDash:[6,5],disableMultiStroke:true,seed:7}));},
+ frame(x,y,w,h,tw,th,split){const o={stroke:'#79513C',strokeWidth:1.25,roughness:0.7,seed:Math.floor(x+y*3)};
+  add(rc.path(rr(x,y,w,h,4),o));add(rc.linearPath([[x,y+th],[x+tw-6,y+th],[x+tw,y+th-6],[x+tw,y]],o));
+  if(split)add(rc.line(x+8,split,x+w-8,split,{...o,strokeLineDash:[6,5],disableMultiStroke:true}));},
+ rule(x0,y,x1){add(rc.line(x0,y,x1,y,{stroke:'#79513C',strokeWidth:1,roughness:0.5,seed:3}));},
+ dot(x,y,r,fill){const c=document.createElementNS(NS,'circle');Object.entries({cx:x,cy:y,r,fill}).forEach(([k,v])=>c.setAttribute(k,v));add(c);},
+};/*/OPS*/
+const errs=[];for(const op of SCENE){try{OPS[op[0]](...op.slice(1));}catch(e){errs.push(op[0]+': '+e.message);}}
+if(errs.length){console.error(errs.join(' | '));OPS.text(12,44,'RENDER ERROR in '+errs[0],16,'#C85A32','sans',700,'start','',0);}
+Promise.all(["600 16px Karla","800 16px Karla","400 16px 'Courier Prime'","700 16px 'Courier Prime'","600 20px 'Zilla Slab'","700 20px 'Zilla Slab'","italic 400 17px 'Zilla Slab'"].map(f=>document.fonts.load(f))).then(r=>{
+ const fell=r.some(a=>!a.length);
+ if(fell)OPS.text(12,24,'FONTS DID NOT LOAD - do not ship this PNG',18,'#C85A32','sans',700,'start','',0);
+ svg.setAttribute('data-drawn',errs.length?'render-error':fell?'font-fallback':'ok');});
 </script></body></html>
