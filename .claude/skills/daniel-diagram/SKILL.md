@@ -39,6 +39,7 @@ Do not use the `diagram-design` skill or excalidraw.com for the final render; wh
 | `article` (default) | 660px exact → 1320px PNG, shown 1:1 | DanielSite post (the article column) |
 | `readme` | 880px exact | GitHub README |
 | `fit` | content + 24px on each side | study notes; warns when it would shrink in the article column |
+| `video` | 660×371 exact (16:9) | a diagram that daniel-video animates; fills the video frame, and the post shows it 1:1 |
 
 Content must fit the canvas minus 24px each side (612px for `article`), or the lint fails. Narrow the layout, split it or cut — never shrink the type. A 2351px PNG squeezed into the 660px column rendered 14px text at 8px; that shipped once.
 
@@ -73,6 +74,8 @@ Content must fit the canvas minus 24px each side (612px for `article`), or the l
 | margin note | Zilla Slab italic 17px, terracotta-700 | `callout` |
 
 In `pencil` the same faces run heavier, as Daniel asked on 28/09/2026 ("bold mais forte"): Karla 800 for names, Courier Prime Bold for `code`, `sub`, arrow labels and tiles, Zilla Slab 700 for zone and group titles; callouts stay Zilla italic 400. The lint measures the bold cuts too.
+
+**Words on the drawing** follow `humanizer` and keep only the spine of `eli5`: a label is a name or identifier a person would say out loud, never a slogan, a staged contrast or a caption ("Node = ride", "It does not reserve a seat" are post text, not labels). Each term sits on the piece it names. An analogy only when there is no plain word, one per diagram, an adult one, and in the post's own words. The explanation lives in the post, written with `daniel-writing`.
 
 "Chat use case" is a `label`; `AskChatUseCase.Ask` is `code`. Nothing below 13px. Every face is self-hosted by the site with latin-ext, so Maltese renders; no other face goes in a diagram.
 

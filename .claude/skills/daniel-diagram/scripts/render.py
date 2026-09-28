@@ -46,7 +46,8 @@ TOKENS = set((                        # every hex in tokens.css (frozen there); 
     "#26211C #2E261F #2F6B5E #3A2A1E #3A2F26 #3E3831 #3F6472 #46708D #4E5639 #512BD4 #51463C #555E3C #56607F #5B5F7A "
     "#5F4B8B #66704B #6A5A8C #79513C #7A4A2E #8A6532 #8A6A20 #8E4767 #8F3D22 #9A4B33 #A84A28 #A8AE8B #C05A2E #C85A32 "
     "#C9D6DC #DCE4E8 #E4C6BE #E6CFA3 #E7E2ED #EEDFC7 #EFCDB4 #F3E7D0 #F7EDDA #FBF4E6 #FDF7EA #FFF9F1").split())
-PRESETS = {"article": 660, "readme": 880, "fit": None}
+PRESETS = {"article": 660, "readme": 880, "fit": None, "video": 660}
+VIDEO_H = 371                         # size video: 16:9 at the post column's width, so a daniel-video frame shows the text 1:1
 PAD = 24
 SIZE = {"zone": 18, "group": 16, "label": 16, "code": 16, "sub": 13.5, "edge": 13}   # zone/group: mono titles only
 LS_EDGE = 0.12                        # --ls-label: the site's uppercase mono labels
@@ -730,6 +731,10 @@ def main():
         if fonts and min(fonts) * min(1, 660 / sw) < MIN_FONT:
             warn(f"in the 660px article column this shows at {min(1, 660 / sw):.0%}; the smallest text becomes {min(fonts) * min(1, 660 / sw):.1f}px")
     sh, dy = ch + 2 * PAD, PAD - miny
+    if preset == "video":
+        if ch > VIDEO_H - 2 * PAD + 0.5:
+            fail(f"content is {ch:.0f}px tall; 'video' leaves {VIDEO_H - 2 * PAD}px - widen and flatten the layout, or split it into two diagrams")
+        sh, dy = VIDEO_H, (VIDEO_H - ch) / 2 - miny
     sw, sh = math.ceil(sw), math.ceil(sh)
 
     fails = [n for n in notes if n[0] == "FAIL"]
