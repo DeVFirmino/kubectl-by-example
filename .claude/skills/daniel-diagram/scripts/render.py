@@ -64,6 +64,7 @@ def bump(fam, w):
     if not BOLD: return w
     return {"sans": 800, "mono": 700, "slab": 700}.get(fam, w)
 
+KEPT = set()                           # id(op) of free text whose spec set fontWeight: pencil leaves that weight alone
 OWN = {}                               # id(op) -> the element that drew it ("s1", "s1:sub", "a1:label"): daniel-video animates by it
 def tag(op, oid):
     OWN[id(op)] = oid
@@ -92,10 +93,11 @@ def _load(fam, weight):
             _faces[key] = None
     return _faces[key]
 
-def text_w(t, fam, weight, size, ls=0):
+def text_w(t, fam, weight, size, ls=0, exact=False):
+    """exact: the weight is final (a spec's own fontWeight, or an op already bumped), so pencil doesn't bump it again."""
     fam = {True: "mono", False: "sans"}.get(fam, fam)
-    weight = bump(fam, weight)
-    slack = 1.03 if BOLD and fam == "slab" else 1       # only the 600 Zilla file ships; 700 runs a little wider
+    if not exact: weight = bump(fam, weight)
+    slack = 1.03 if fam == "slab" and weight > 600 else 1   # only the 600 Zilla file ships; 700 runs a little wider
     return slack * _text_w(t, fam, weight, size, ls)
 
 def _text_w(t, fam, weight, size, ls):
@@ -622,15 +624,17 @@ def main():
     for e in els:
         if e["type"] == "text":
             sans = e.get("font") == "sans"
-            fs = e["fontSize"]; w = int(e.get("fontWeight", 600 if sans else 400))
+            fs = e["fontSize"]; w = int(e.get("fontWeight", 600 if sans else 400)); kept = "fontWeight" in e
             anchor = e.get("anchor", "start")
             legacy = ids.get(e["id"][:-1], {})          # old specs coloured "<box>t" by its box
             c = e.get("strokeColor") or ids.get(e.get("in"), {}).get("_tc") or legacy.get("_tc") or INK
             if c.upper() not in TOKENS: fail(f"{e['id']}: colour {c} is not a tokens.css colour")
-            tl = lines(e["text"]); tw = max(text_w(t, not sans, w, fs) for t in tl)
+            tl = lines(e["text"]); tw = max(text_w(t, not sans, w, fs, exact=kept) for t in tl)
             x0 = e["x"] - {"start": 0, "middle": tw / 2, "end": tw}[anchor]
             for i, t in enumerate(tl):
-                scene_text.append(tag(["text", e["x"], e["y"] + fs * 0.95 + i * fs * 1.25, t, fs, c, "sans" if sans else "mono", w, anchor, "", 0], e["id"]))
+                op = tag(["text", e["x"], e["y"] + fs * 0.95 + i * fs * 1.25, t, fs, c, "sans" if sans else "mono", w, anchor, "", 0], e["id"])
+                if kept: KEPT.add(id(op))
+                scene_text.append(op)
             e["_r"] = (x0, e["y"], x0 + tw, e["y"] + fs * 1.25 * len(tl))
             texts.append((e["_r"], f"{e['id']} text"))
             for n in nodes:
@@ -779,7 +783,8 @@ def main():
     if pencil:
         restyle = {"frame": "pframe", "step": "pstep", "arrow": "parrow"}      # legend, frames and steps follow the pencil look too
         for i, op in enumerate(scene):
-            if op[0] == "text": op[7] = bump(op[6], op[7])
+            if op[0] == "text":
+                if id(op) not in KEPT: op[7] = bump(op[6], op[7])
             elif op[0] in restyle: scene[i] = tag([restyle[op[0]], *op[1:]], OWN.get(id(op)))
             elif op[0] == "shape" and op in scene_legend:                        # legend swatch: _, typ, x, y, w, h, fill, stroke, op, dashed, ...
                 role = next((r for r, v in ROLES.items() if v[0] == op[6]), "component")
@@ -936,7 +941,7 @@ def write_bake(path, scene):
                  **({"endArrowhead": "arrow"} if head else {}))
         elif k == "text":
             _, x, y, t, fs, c, fam, w, anchor, base, ls = op[:11]
-            width = text_w(t, fam, w, fs, ls)
+            width = text_w(t, fam, w, fs, ls, exact=True)
             el("text", x=x - {"start": 0, "middle": width / 2, "end": width}[anchor], y=y - fs * (0.65 if base else 0.95),
                width=width, height=fs * 1.25, text=t, fontSize=fs, fontFamily=3 if fam == "mono" else 2,
                textAlign="left", verticalAlign="top", strokeColor=c)
