@@ -1,0 +1,180 @@
+{
+ "type": "excalidraw",
+ "version": 2,
+ "source": "daniel-diagram",
+ "size": "article",
+ "title": "How kubectl reaches a container",
+ "alt": "kubectl talks to the control plane, which schedules pods onto a node where the kubelet and container runtime start the containers",
+ "appState": {
+  "viewBackgroundColor": "#FBF4E6"
+ },
+ "elements": [
+  {
+   "type": "rectangle",
+   "id": "cp",
+   "x": 24,
+   "y": 112,
+   "width": 612,
+   "height": 240,
+   "role": "zone-warm",
+   "label": "Control plane"
+  },
+  {
+   "type": "rectangle",
+   "id": "node",
+   "x": 24,
+   "y": 400,
+   "width": 612,
+   "height": 380,
+   "role": "zone-light",
+   "label": "Node"
+  },
+  {
+   "type": "rectangle",
+   "id": "pod1",
+   "x": 48,
+   "y": 648,
+   "width": 264,
+   "height": 108,
+   "role": "group",
+   "code": "pod/nginx"
+  },
+  {
+   "type": "rectangle",
+   "id": "pod2",
+   "x": 344,
+   "y": 648,
+   "width": 264,
+   "height": 108,
+   "role": "group",
+   "code": "pod/redis"
+  },
+  {
+   "type": "rectangle",
+   "id": "kubectl",
+   "cx": 328,
+   "y": 24,
+   "role": "focal",
+   "code": "kubectl"
+  },
+  {
+   "type": "rectangle",
+   "id": "api",
+   "cx": 328,
+   "y": 156,
+   "role": "component",
+   "label": "API server"
+  },
+  {
+   "type": "cylinder",
+   "id": "etcd",
+   "x": 60,
+   "y": 264,
+   "width": 128,
+   "role": "component",
+   "code": "etcd"
+  },
+  {
+   "type": "rectangle",
+   "id": "sched",
+   "x": 220,
+   "y": 268,
+   "width": 152,
+   "role": "component",
+   "label": "Scheduler"
+  },
+  {
+   "type": "rectangle",
+   "id": "cm",
+   "x": 404,
+   "y": 268,
+   "width": 192,
+   "role": "component",
+   "label": "Controller manager"
+  },
+  {
+   "type": "rectangle",
+   "id": "kubelet",
+   "cx": 328,
+   "y": 448,
+   "role": "component",
+   "code": "kubelet"
+  },
+  {
+   "type": "rectangle",
+   "id": "rt",
+   "cx": 328,
+   "y": 536,
+   "role": "component",
+   "label": "Container runtime"
+  },
+  {
+   "type": "rectangle",
+   "id": "c1",
+   "cx": 180,
+   "y": 688,
+   "role": "focal",
+   "code": "nginx"
+  },
+  {
+   "type": "rectangle",
+   "id": "c2",
+   "cx": 476,
+   "y": 688,
+   "role": "focal",
+   "code": "redis"
+  },
+  {
+   "type": "arrow",
+   "id": "a1",
+   "from": "kubectl",
+   "to": "api",
+   "label": "https"
+  },
+  {
+   "type": "arrow",
+   "id": "a2",
+   "from": "api",
+   "to": "etcd"
+  },
+  {
+   "type": "arrow",
+   "id": "a3",
+   "from": "api",
+   "to": "sched"
+  },
+  {
+   "type": "arrow",
+   "id": "a4",
+   "from": "api",
+   "to": "cm"
+  },
+  {
+   "type": "arrow",
+   "id": "a5",
+   "from": "cp",
+   "to": "node"
+  },
+  {
+   "type": "arrow",
+   "id": "a6",
+   "from": "kubelet",
+   "to": "rt",
+   "label": "CRI"
+  },
+  {
+   "type": "arrow",
+   "id": "a7",
+   "from": "rt",
+   "to": "c1",
+   "mid": 620
+  },
+  {
+   "type": "arrow",
+   "id": "a8",
+   "from": "rt",
+   "to": "c2",
+   "mid": 620
+  }
+ ]
+}
