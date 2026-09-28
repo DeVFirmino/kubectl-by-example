@@ -37,6 +37,9 @@ PENCIL = {
     "end": ("#FBF4E6", None, None),
 }
 SHADOW = {"node": 6, "zone": 8, "tile": 4, "pill": 3}
+# pencil: titles that sit on paper (zone and group titles, a tile grid's name) take the role's strong ink; text on a hatched fill stays graphite
+TITLE_INK = {"zone-warm": "#79513C", "zone-light": "#3F6472", "group": "#555E3C",
+             "component": "#3F6472", "focal": "#8F3D22", "external": "#51463C"}
 CANVAS, ARROW, INK, MUTED, HAND = "#FBF4E6", "#51463C", "#26211C", "#51463C", "#8F3D22"
 ACCENT = "#C85A32"
 TOKENS = set((                        # every hex in tokens.css (frozen there); the roles use a few of them
@@ -59,6 +62,11 @@ def bump(fam, w):
     """pencil weights: Karla 800 for names, Courier Prime Bold for anything typed, Zilla Slab 700 for titles."""
     if not BOLD: return w
     return {"sans": 800, "mono": 700, "slab": 700}.get(fam, w)
+
+OWN = {}                               # id(op) -> the element that drew it ("s1", "s1:sub", "a1:label"): daniel-video animates by it
+def tag(op, oid):
+    OWN[id(op)] = oid
+    return op
 
 notes = []
 def fail(m): notes.append(("FAIL", m))
@@ -190,7 +198,8 @@ def main():
     args = sys.argv[1:]
     force = "--force" in args
     bake = args[args.index("--bake") + 1] if "--bake" in args else None
-    pos = [a for i, a in enumerate(args) if not a.startswith("--") and (i == 0 or args[i - 1] != "--bake")]
+    scene_out = args[args.index("--scene") + 1] if "--scene" in args else None     # the drawing as ops + owners, for daniel-video
+    pos = [a for i, a in enumerate(args) if not a.startswith("--") and (i == 0 or args[i - 1] not in ("--bake", "--scene"))]
     if not pos:
         print(__doc__); sys.exit(1)
     src, out = pos[0], (pos[1] if len(pos) > 1 else None)
@@ -324,11 +333,11 @@ def main():
             ph, pw = fs * 1.3 + 10, w + 28
             px = x1 - 18 - pw if z.get("titleAt") == "right" else x0 + 18
             rt = (px, y0 - ph / 2, px + pw, y0 + ph / 2)
-            z["_pill"] = ["pill", px, y0 - ph / 2, pw, ph, (PENCIL.get(z["role"]) or (None, None, "#C9D6DC"))[2] or "#C9D6DC", INK, SHADOW["pill"], 0]
-            scene_text.append(["text", px + pw / 2, y0 + 0.5, name, fs, INK, fam, wt, "middle", "central", 0])
+            z["_pill"] = tag(["pill", px, y0 - ph / 2, pw, ph, (PENCIL.get(z["role"]) or (None, None, "#C9D6DC"))[2] or "#C9D6DC", INK, SHADOW["pill"], 0], z["id"] + ":title")
+            scene_text.append(tag(["text", px + pw / 2, y0 + 0.5, name, fs, TITLE_INK.get(z["role"], INK), fam, wt, "middle", "central", 0], z["id"] + ":title"))
         else:
             tx, ty = (x1 - 12 - w if z.get("titleAt") == "right" else x0 + 12), y0 + 10
-            scene_text.append(["text", tx, ty + fs * 0.65, name, fs, z["_tc"], fam, wt, "start", "central", 0])
+            scene_text.append(tag(["text", tx, ty + fs * 0.65, name, fs, z["_tc"], fam, wt, "start", "central", 0], z["id"] + ":title"))
             rt = (tx, ty, tx + w, ty + fs * 1.3)
         if rt[2] > x1 - 8: fail(f"{z['id']}: title is wider than the {'group' if z['role'] == 'group' else 'zone'}")
         texts.append((rt, f"{z['id']} title"))
@@ -347,11 +356,13 @@ def main():
         prev = None
         for t, mono, w, fs, c, part in e["_block"]:
             if prev == "main" and part == "sub": top += 4
+            if pencil and part == "main": c = INK            # on a hatched fill only graphite keeps its contrast
             if pencil and part == "sub":                 # the sub line sits in a small pill, as wide as the box allows
                 pw = min(text_w(t, "mono", w, fs) + 20, (x1 - x0) - 12)
-                scene_mask.append(["pill", cx - pw / 2, top - 1, pw, fs * 1.3 + 3, "#FFF9F1", INK, 2, 0])
+                scene_mask.append(tag(["pill", cx - pw / 2, top - 1, pw, fs * 1.3 + 3, "#FFF9F1", INK, 2, 0], e["id"] + ":sub"))
                 c = INK
-            scene_text.append(["text", cx, top + fs * 0.65, t, fs, c, "mono" if mono else "sans", w, "middle", "central", 0])
+            scene_text.append(tag(["text", cx, top + fs * 0.65, t, fs, c, "mono" if mono else "sans", w, "middle", "central", 0],
+                                  e["id"] + (":sub" if part == "sub" else "")))
             top += fs * 1.3; prev = part
         bw = max(text_w(t, m, w, s) for t, m, w, s, _, _ in e["_block"])
         texts.append(((cx - bw / 2, cy - e["_bh"] / 2, cx + bw / 2, cy + e["_bh"] / 2), f"{e['id']} text"))
@@ -518,8 +529,8 @@ def main():
     for a in arrows:
         pts = a["_pts"]
         if not pts: continue
-        scene_arrows.append(["arrow", [list(p) for p in hopped(a)], a["strokeColor"], bool(a.get("dashed")), a["head"],
-                             int(pts[0][0] * 3 + pts[0][1])])
+        scene_arrows.append(tag(["arrow", [list(p) for p in hopped(a)], a["strokeColor"], bool(a.get("dashed")), a["head"],
+                                 int(pts[0][0] * 3 + pts[0][1])], a["id"]))
         segs = list(zip(pts, pts[1:]))
         ln = lambda s: abs(s[1][0] - s[0][0]) + abs(s[1][1] - s[0][1])
 
@@ -534,7 +545,7 @@ def main():
             first = min(0.25, 32 / L) if i else min(20, L / 2) / L
             f = next((c for c in (first, 0.5, 0.35, 0.65, 0.2, 0.8) if clear(c)), first)
             mx, my = p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f
-            scene_marks.append(["step", mx, my, str(a["step"])])
+            scene_marks.append(tag(["step", mx, my, str(a["step"])], a["id"] + ":step"))
             texts.append(((mx - 11, my - 11, mx + 11, my + 11), f"{a['id']} step"))
             step_at = (i, f)
         text = a.get("label") or a.get("code")
@@ -573,13 +584,13 @@ def main():
         if on_border(m): warn(f"{a['id']}: label sits on a zone border - labelAt/labelSegment or more room")
         if pencil:                                   # a pill; the main path's label becomes a tilted stamp
             stamp = bool(a.get("accent"))
-            scene_mask.append(["pill", m[0] - 4, m[1] - 1, m[2] - m[0] + 8, m[3] - m[1] + 2, "#EFCDB4" if stamp else "#FFF9F1",
-                               INK, SHADOW["pill"], -4 if stamp else 0])
+            scene_mask.append(tag(["pill", m[0] - 4, m[1] - 1, m[2] - m[0] + 8, m[3] - m[1] + 2, "#EFCDB4" if stamp else "#FFF9F1",
+                                   INK, SHADOW["pill"], -4 if stamp else 0], a["id"] + ":label"))
         else:
-            scene_mask.append(["mask", m[0], m[1], m[2] - m[0], m[3] - m[1], bg_at(((m[0] + m[2]) / 2, (m[1] + m[3]) / 2))])
+            scene_mask.append(tag(["mask", m[0], m[1], m[2] - m[0], m[3] - m[1], bg_at(((m[0] + m[2]) / 2, (m[1] + m[3]) / 2))], a["id"] + ":label"))
         for i, t in enumerate(t_lines):
-            scene_text.append(["text", (m[0] + m[2]) / 2, m[1] + 2 + fs * 1.3 * (i + 0.5), t, fs, INK if pencil else MUTED, efam, 400, "middle", "central", ls]
-                              + ([-4] if pencil and a.get("accent") else []))
+            scene_text.append(tag(["text", (m[0] + m[2]) / 2, m[1] + 2 + fs * 1.3 * (i + 0.5), t, fs, INK if pencil else MUTED, efam, 400, "middle", "central", ls]
+                                  + ([-4] if pencil and a.get("accent") else []), a["id"] + ":label"))
         texts.append((m, f"{a['id']} label"))
         edge_labels.append((m, a))
         for n in nodes:
@@ -593,15 +604,15 @@ def main():
         sfam, _, sfs, sls = TYPE["stamp"]
         op = e.get("op", "alt").upper(); ow = text_w(op, sfam, 400, sfs, sls)
         tab = (x, y, x + ow + 16, y + sfs * 1.3 + 8)
-        scene_frames.append(["frame", x, y, w, h, tab[2] - x, tab[3] - y, e.get("split")])
-        scene_text.append(["text", x + 8, y + (tab[3] - y) / 2, op, sfs, MUTED, sfam, 400, "start", "central", sls])
+        scene_frames.append(tag(["frame", x, y, w, h, tab[2] - x, tab[3] - y, e.get("split")], e["id"]))
+        scene_text.append(tag(["text", x + 8, y + (tab[3] - y) / 2, op, sfs, MUTED, sfam, 400, "start", "central", sls], e["id"]))
         texts.append((tab, f"{e['id']} op"))
         for g, gy in ((e.get("guard"), y + (tab[3] - y) / 2), (e.get("guard2"), (e.get("split") or 0) + 14)):
             if not g: continue
             gx = tab[2] + 10 if gy < tab[3] else x + 12
             gw = text_w(g, "mono", 400, SIZE["edge"])
-            scene_mask.append(["mask", gx - 4, gy - 10, gw + 8, 20, bg_at((gx, gy))])
-            scene_text.append(["text", gx, gy, g, SIZE["edge"], MUTED, "mono", 400, "start", "central", 0])
+            scene_mask.append(tag(["mask", gx - 4, gy - 10, gw + 8, 20, bg_at((gx, gy))], e["id"]))
+            scene_text.append(tag(["text", gx, gy, g, SIZE["edge"], MUTED, "mono", 400, "start", "central", 0], e["id"]))
             texts.append(((gx, gy - 9, gx + gw, gy + 9), f"{e['id']} guard"))
         e["_r"] = (x, y, x + w, y + h)
 
@@ -618,7 +629,7 @@ def main():
             tl = lines(e["text"]); tw = max(text_w(t, not sans, w, fs) for t in tl)
             x0 = e["x"] - {"start": 0, "middle": tw / 2, "end": tw}[anchor]
             for i, t in enumerate(tl):
-                scene_text.append(["text", e["x"], e["y"] + fs * 0.95 + i * fs * 1.25, t, fs, c, "sans" if sans else "mono", w, anchor, "", 0])
+                scene_text.append(tag(["text", e["x"], e["y"] + fs * 0.95 + i * fs * 1.25, t, fs, c, "sans" if sans else "mono", w, anchor, "", 0], e["id"]))
             e["_r"] = (x0, e["y"], x0 + tw, e["y"] + fs * 1.25 * len(tl))
             texts.append((e["_r"], f"{e['id']} text"))
             for n in nodes:
@@ -633,7 +644,7 @@ def main():
             x0 = e["x"] - {"start": 0, "middle": tw / 2, "end": tw}[anchor]
             r = (x0, e["y"], x0 + tw, e["y"] + lh * len(tl))
             for i, t in enumerate(tl):
-                scene_callouts.append(["text", e["x"], e["y"] + lh * (i + 0.5), t, fs, HAND, nfam, 400, anchor, "central", 0])
+                scene_callouts.append(tag(["text", e["x"], e["y"] + lh * (i + 0.5), t, fs, HAND, nfam, 400, anchor, "central", 0], e["id"]))
             c = ((r[0] + r[2]) / 2, (r[1] + r[3]) / 2)
             if "at" in e: tgt = tuple(e["at"])
             elif e.get("to") in rects:
@@ -647,8 +658,8 @@ def main():
             mx, my = (st[0] + tgt[0]) / 2, (st[1] + tgt[1]) / 2
             dx, dy = tgt[0] - st[0], tgt[1] - st[1]
             ctrl = (mx - dy * 0.25, my + dx * 0.25)
-            scene_callouts.append(["leader", f"M{st[0]:.1f},{st[1]:.1f} Q{ctrl[0]:.1f},{ctrl[1]:.1f} {tgt[0]:.1f},{tgt[1]:.1f}"])
-            scene_callouts.append(["dot", tgt[0], tgt[1], 3.5, HAND])
+            scene_callouts.append(tag(["leader", f"M{st[0]:.1f},{st[1]:.1f} Q{ctrl[0]:.1f},{ctrl[1]:.1f} {tgt[0]:.1f},{tgt[1]:.1f}"], e["id"]))
+            scene_callouts.append(tag(["dot", tgt[0], tgt[1], 3.5, HAND], e["id"]))
             texts.append((r, f"{e['id']} callout"))
             e["_r"] = (min(r[0], tgt[0]), min(r[1], tgt[1]), max(r[2], tgt[0]), max(r[3], tgt[1]))
             for n in nodes:
@@ -732,39 +743,43 @@ def main():
     base_of = lambda e: (PENCIL.get(e.get("role")) or (e["backgroundColor"],))[0]
     for z in containers:
         if pencil:
-            scene.append(["pzone", *rects[z["id"]][:2], z["width"], z["height"], base_of(z), INK, bool(z.get("dashed")),
-                          (PENCIL.get(z["role"]) or (0, None))[1], SHADOW["zone"]])
+            scene.append(tag(["pzone", *rects[z["id"]][:2], z["width"], z["height"], base_of(z), INK, bool(z.get("dashed")),
+                              (PENCIL.get(z["role"]) or (0, None))[1], SHADOW["zone"]], z["id"]))
             if "_pill" in z: scene.append(z["_pill"])
         else:
-            scene.append(["shape", "rectangle", *rects[z["id"]][:2], z["width"], z["height"], z["backgroundColor"], z["strokeColor"],
-                          z["opacity"] / 100, bool(z.get("dashed")), 1.5, 0.9, False])
-    scene += scene_frames + ([["parrow", *op[1:]] for op in scene_arrows] if pencil else scene_arrows)
+            scene.append(tag(["shape", "rectangle", *rects[z["id"]][:2], z["width"], z["height"], z["backgroundColor"], z["strokeColor"],
+                              z["opacity"] / 100, bool(z.get("dashed")), 1.5, 0.9, False], z["id"]))
+    scene += scene_frames + ([tag(["parrow", *op[1:]], OWN.get(id(op))) for op in scene_arrows] if pencil else scene_arrows)
     for n in nodes:
-        if n["type"] == "tiles":
-            scene.append(["tiles", n["x"], n["y"], [[dx, dy, s, PENCIL[r][0], PENCIL[r][1], INK, t] for dx, dy, s, r, t in n["_tiles"]],
-                          SHADOW["tile"]])
+        if n["type"] == "tiles":                    # one op per tile, so a video can flip a single replica
+            for k, (ox_, oy_, s_, r, t) in enumerate(n["_tiles"]):    # ox_/oy_: never reuse dx/dy, the page offset
+                scene.append(tag(["pshape", "rectangle", n["x"] + ox_, n["y"] + oy_, s_, s_, PENCIL[r][0], PENCIL[r][1], INK, False, False,
+                                  SHADOW["tile"]], f"{n['id']}:{k}"))
+                if t: scene.append(tag(["text", n["x"] + ox_ + s_ / 2, n["y"] + oy_ + s_ / 2 + 0.5, t, 16, INK, "mono", 700, "middle", "central", 0],
+                                       f"{n['id']}:{k}"))
             if "_name" in n:
                 name, mono = n["_name"]
-                scene_text.append(["text", n["x"], n["y"] + 9, name, 15, INK, "mono" if mono else "sans", 400 if mono else 600, "start", "central", 0])
+                scene_text.append(tag(["text", n["x"], n["y"] + 9, name, 15, TITLE_INK["component"] if pencil else INK, "mono" if mono else "sans",
+                                       400 if mono else 600, "start", "central", 0], n["id"] + ":name"))
             continue
         if pencil and n.get("role") not in ("start", "end"):
-            scene.append(["pshape", n["type"], *rects[n["id"]][:2], n["width"], n["height"], base_of(n),
-                          (PENCIL.get(n.get("role")) or (0, None))[1], INK, bool(n.get("dashed")), bool(n.get("pill")), SHADOW["node"]])
+            scene.append(tag(["pshape", n["type"], *rects[n["id"]][:2], n["width"], n["height"], base_of(n),
+                              (PENCIL.get(n.get("role")) or (0, None))[1], INK, bool(n.get("dashed")), bool(n.get("pill")), SHADOW["node"]], n["id"]))
             continue
-        scene.append(["shape", n["type"], *rects[n["id"]][:2], n["width"], n["height"], n["backgroundColor"], n["strokeColor"],
-                      n["opacity"] / 100, bool(n.get("dashed")), 2, 1.2, bool(n.get("pill"))])
+        scene.append(tag(["shape", n["type"], *rects[n["id"]][:2], n["width"], n["height"], n["backgroundColor"], n["strokeColor"],
+                          n["opacity"] / 100, bool(n.get("dashed")), 2, 1.2, bool(n.get("pill"))], n["id"]))
         if n.get("role") == "end":
-            scene.append(["shape", "ellipse", n["x"] + 5, n["y"] + 5, n["width"] - 10, n["height"] - 10, INK, INK, 1, False, 1, 0.5, False])
+            scene.append(tag(["shape", "ellipse", n["x"] + 5, n["y"] + 5, n["width"] - 10, n["height"] - 10, INK, INK, 1, False, 1, 0.5, False], n["id"]))
     scene += scene_mask + scene_text + scene_marks + scene_callouts + scene_legend
     if pencil:
         restyle = {"frame": "pframe", "step": "pstep", "arrow": "parrow"}      # legend, frames and steps follow the pencil look too
         for i, op in enumerate(scene):
             if op[0] == "text": op[7] = bump(op[6], op[7])
-            elif op[0] in restyle: scene[i] = [restyle[op[0]], *op[1:]]
+            elif op[0] in restyle: scene[i] = tag([restyle[op[0]], *op[1:]], OWN.get(id(op)))
             elif op[0] == "shape" and op in scene_legend:                        # legend swatch: _, typ, x, y, w, h, fill, stroke, op, dashed, ...
                 role = next((r for r, v in ROLES.items() if v[0] == op[6]), "component")
                 base, hatch, _ = PENCIL.get(role, (op[6], None, None))
-                scene[i] = ["pshape", op[1], op[2], op[3], op[4], op[5], base, hatch, INK, op[9], False, 2]
+                scene[i] = tag(["pshape", op[1], op[2], op[3], op[4], op[5], base, hatch, INK, op[9], False, 2], "legend")
     slug = Path(out).stem
     page = (PAGE.replace("{W}", str(sw)).replace("{H}", str(sh)).replace("{DX}", f"{dx:.1f}").replace("{DY}", f"{dy:.1f}")
             .replace("{SLUG}", H.escape(slug)).replace("{TITLE}", H.escape(spec.get("title", slug)))
@@ -773,6 +788,9 @@ def main():
             .replace("{BG}", '<rect width="100%" height="100%" fill="url(#dots)"/>' if pencil else ""))
     open(out, "w").write(page)
     if bake: write_bake(bake, scene)
+    if scene_out:
+        json.dump({"width": sw, "height": sh, "dx": round(dx, 1), "dy": round(dy, 1), "style": style, "pencil": PENCIL,
+                   "ops": scene, "owners": [OWN.get(id(op)) for op in scene]}, open(scene_out, "w"))
     print(f"wrote {out}")
 
 PAGE = """<!DOCTYPE html><html><head><meta charset="utf-8"><title>{TITLE}</title>
@@ -781,7 +799,7 @@ PAGE = """<!DOCTYPE html><html><head><meta charset="utf-8"><title>{TITLE}</title
 <style>body{margin:0;background:#FBF4E6} svg{display:block}</style></head><body>
 <svg id="s" xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" role="img" aria-labelledby="{SLUG}-title {SLUG}-desc"{EXACT}>
 <title id="{SLUG}-title">{TITLE}</title><desc id="{SLUG}-desc">{DESC}</desc>
-<defs>
+<defs><!--DEFS-->
  <filter id="grain" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="1.15" numOctaves="2" seed="7" result="n"/>
   <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.75" result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/></filter>
  <filter id="graphite" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="3" result="w"/>
@@ -789,13 +807,14 @@ PAGE = """<!DOCTYPE html><html><head><meta charset="utf-8"><title>{TITLE}</title
   <feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="1" seed="11" result="n"/>
   <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.5 1.6" result="a"/><feComposite in="d" in2="a" operator="in"/></filter>
  <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#E6CFA3"/></pattern>
-</defs>
+<!--/DEFS--></defs>
 <rect width="100%" height="100%" fill="#FBF4E6"/>{BG}<g id="g" transform="translate({DX},{DY})"></g></svg>
 <script>
 const SCENE={SCENE};
 const svg=document.getElementById('s'), g=document.getElementById('g'), rc=rough.svg(svg), NS='http://www.w3.org/2000/svg';
-const FAM={sans:"'Karla', sans-serif",mono:"'Courier Prime', monospace",slab:"'Zilla Slab', serif",slabi:"'Zilla Slab', serif"};
-const add=n=>(g.appendChild(n),n);
+let TARGET=g;
+/*OPS*/const FAM={sans:"'Karla', sans-serif",mono:"'Courier Prime', monospace",slab:"'Zilla Slab', serif",slabi:"'Zilla Slab', serif"};
+const add=n=>(TARGET.appendChild(n),n);
 const dash=d=>d?{strokeLineDash:[8,6],disableMultiStroke:true}:{};
 const rr=(x,y,w,h,r)=>`M${x+r},${y} h${w-2*r} a${r},${r} 0 0 1 ${r},${r} v${h-2*r} a${r},${r} 0 0 1 -${r},${r} h-${w-2*r} a${r},${r} 0 0 1 -${r},-${r} v-${h-2*r} a${r},${r} 0 0 1 ${r},-${r} z`;
 const OPS={
@@ -862,7 +881,7 @@ const OPS={
   if(split)add(rc.line(x+8,split,x+w-8,split,{...o,strokeLineDash:[6,5],disableMultiStroke:true}));},
  rule(x0,y,x1){add(rc.line(x0,y,x1,y,{stroke:'#79513C',strokeWidth:1,roughness:0.5,seed:3}));},
  dot(x,y,r,fill){const c=document.createElementNS(NS,'circle');Object.entries({cx:x,cy:y,r,fill}).forEach(([k,v])=>c.setAttribute(k,v));add(c);},
-};
+};/*/OPS*/
 const errs=[];for(const op of SCENE){try{OPS[op[0]](...op.slice(1));}catch(e){errs.push(op[0]+': '+e.message);}}
 if(errs.length){console.error(errs.join(' | '));OPS.text(12,44,'RENDER ERROR in '+errs[0],16,'#C85A32','sans',700,'start','',0);}
 Promise.all(["600 16px Karla","800 16px Karla","400 16px 'Courier Prime'","700 16px 'Courier Prime'","600 20px 'Zilla Slab'","700 20px 'Zilla Slab'","italic 400 17px 'Zilla Slab'"].map(f=>document.fonts.load(f))).then(r=>{
