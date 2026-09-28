@@ -26,19 +26,24 @@ RC=0
 [ -s "$OUT" ] || { echo "capture failed (chrome exit $RC): $OUT"; exit 1; }
 EXACT=$(grep -c 'data-exact' "$IN" || true)
 python3 - "$OUT" "$EXACT" "$W" "$H" <<'PY'
-import os, sys
-from PIL import Image, ImageChops
+import math, os, sys
+from PIL import Image, ImageChops, ImageStat
 p, exact, w, h = sys.argv[1], sys.argv[2] != "0", int(sys.argv[3]), int(sys.argv[4])
 im = Image.open(p).convert('RGB')
 if exact:
     if im.width < w * 2 or im.height < h * 2:
         os.remove(p); sys.exit(f"capture came out {im.width}x{im.height}, expected {w * 2}x{h * 2} - not keeping {p}")
-    im.crop((0, 0, w * 2, h * 2)).save(p)
+    im = im.crop((0, 0, w * 2, h * 2))
 else:
     bg = Image.new('RGB', im.size, im.getpixel((2, 2)))
     box = ImageChops.difference(im, bg).getbbox()
     if box:
         pad = 48; x0, y0, x1, y1 = box
-        im.crop((max(0, x0 - pad), max(0, y0 - pad), min(im.width, x1 + pad), min(im.height, y1 + pad))).save(p)
-print('wrote', p, Image.open(p).size)
+        im = im.crop((max(0, x0 - pad), max(0, y0 - pad), min(im.width, x1 + pad), min(im.height, y1 + pad)))
+# the pencil grain is noise PNG can't squeeze (a 660px diagram came out ~940 KB); a 256-colour palette
+# cuts it ~70% and can't be told apart. Kept only while it stays that faithful (PSNR >= 40 dB).
+q = im.quantize(256, method=Image.Quantize.FASTOCTREE)
+mse = sum(v * v for v in ImageStat.Stat(ImageChops.difference(im, q.convert('RGB'))).rms) / 3
+(q if mse == 0 or 10 * math.log10(255 * 255 / mse) >= 40 else im).save(p, optimize=True)
+print('wrote', p, im.size, f'{os.path.getsize(p) // 1024} KB')
 PY

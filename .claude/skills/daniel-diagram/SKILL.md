@@ -25,7 +25,7 @@ Both use rough.js with the DanielSite paper palette and fonts. Output is a PNG f
 
 1. Write the spec (format below) as JSON in the scratchpad.
 2. `python3 ~/.codex/skills/daniel-diagram/scripts/render.py spec.json out.html [--bake out.excalidraw]` checks, then renders. Fix every FAIL; keep a WARN only for a reason you can say. Without `out.html` it only checks.
-3. `~/.codex/skills/daniel-diagram/scripts/capture.sh out.html out.png` — Chrome headless at 2x. It refuses to write the PNG if the fonts fell back or the page did not finish drawing.
+3. `~/.codex/skills/daniel-diagram/scripts/capture.sh out.html out.png` — Chrome headless at 2x. It refuses to write the PNG if the fonts fell back or the page did not finish drawing. It saves a 256-colour PNG whenever that stays faithful (PSNR ≥ 40 dB): the pencil grain is noise PNG can't compress, and the palette brings a 660px diagram from ~940 KB to ~120–250 KB with no visible change.
 4. **Look at the PNG yourself** (read the image) against the taste gate below before anyone else sees it. The lint knows geometry, not meaning.
 5. **Show Daniel the PNG before placing it** (`open`). He decides; then copy the PNG, the `.json` spec and the `.html` to the destination — for a post, `wwwroot/img/posts/<name>.png` plus `docs/design/posts/<slug>/`.
 6. For a post, write the alt text in each edition: one sentence about what the diagram says, not which shapes it has, read as a native speaker would.
@@ -73,7 +73,7 @@ Content must fit the canvas minus 24px each side (612px for `article`), or the l
 | arrow labels, frame operators | Courier Prime 13px uppercase, tracked (`code` keeps its case) | arrow `label` / `code` |
 | margin note | Zilla Slab italic 17px, terracotta-700 | `callout` |
 
-In `pencil` the same faces run heavier, as Daniel asked on 28/09/2026 ("bold mais forte"): Karla 800 for names, Courier Prime Bold for `code`, `sub`, arrow labels and tiles, Zilla Slab 700 for zone and group titles; callouts stay Zilla italic 400. The lint measures the bold cuts too.
+In `pencil` the same faces run heavier, as Daniel asked on 28/09/2026 ("bold mais forte"): Karla 800 for names, Courier Prime Bold for `code`, `sub`, arrow labels and tiles, Zilla Slab 700 for zone and group titles; callouts stay Zilla italic 400. The lint measures the bold cuts too. Free text keeps a `fontWeight` its spec sets.
 
 **Words on the drawing** follow `humanizer` and keep only the spine of `eli5`: a label is a name or identifier a person would say out loud, never a slogan, a staged contrast or a caption ("Node = ride", "It does not reserve a seat" are post text, not labels). Each term sits on the piece it names. An analogy only when there is no plain word, one per diagram, an adult one, and in the post's own words. The explanation lives in the post, written with `daniel-writing`.
 
@@ -118,7 +118,7 @@ In `pencil` the same faces run heavier, as Daniel asked on 28/09/2026 ("bold mai
 - `callout` — `x`, `y`, `text` and `to` (a shape id) or `at` `[x, y]`: a margin note on a dashed leader. Two at most, never over a box, and still no sentences.
 - `frame` — `x`, `y`, `width`, `height`, `op` (`alt|opt|loop`), `guard`; for `alt` also `split` (y of the dashed divider) and `guard2`.
 - top-level `legend` — `[{"line":"solid|dashed|accent","text":"…"}, {"box":"<role>","text":"…"}]`, a strip under the diagram. Only when a colour or a dash carries meaning no label states.
-- `text` — free text (`x`, `y`, `text`, `fontSize`, `font`: `sans|mono`, `anchor`). Rarely needed: text belongs in its box.
+- `text` — free text (`x`, `y`, `text`, `fontSize`, `font`: `sans|mono`, `anchor`, optional `fontWeight`, kept as given in pencil). Rarely needed: text belongs in its box.
 
 The renderer fixes the paint order (containers, arrows, boxes, labels, text, callouts), so element order no longer matters. Excalidraw ignores the extra keys; `--bake` writes every drawn element (frames, legend, steps and callouts included; paper masks and hop bumps left out) as a plain `.excalidraw` to preview with the `excalidraw` MCP (`create_view`).
 
