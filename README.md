@@ -26,7 +26,7 @@ Section 03 needs a worker node, so it creates the cluster from [`03-taints-and-t
 
 ## Diagrams
 
-Drawn with the skill in [`.claude/skills/daniel-diagram`](.claude/skills/daniel-diagram/SKILL.md): a JSON spec (Excalidraw-compatible) rendered with rough.js and captured as PNG. Each section keeps the spec, the HTML source and the image.
+Drawn with the skill in [`.claude/skills/daniel-diagram`](.claude/skills/daniel-diagram/SKILL.md), in its pencil style: a JSON spec (`diagram.json`) rendered to HTML with rough.js and captured as PNG. Each section keeps the spec, the HTML, an editable `.excalidraw` copy and the image.
 
 ## License
 
