@@ -1,0 +1,212 @@
+{
+ "type": "excalidraw",
+ "version": 2,
+ "source": "daniel-diagram",
+ "size": "article",
+ "title": "AI meter architecture",
+ "alt": "A team client calls the API with an X-Team-Id header; team context and the rate limiter run before the chat use case, which calls Azure OpenAI and records tokens in ai_meter.tokens; OpenTelemetry exports them to Prometheus, Tempo and Loki, and Grafana shows the AI Meter dashboard.",
+ "appState": {
+  "viewBackgroundColor": "#FBF4E6"
+ },
+ "elements": [
+  {
+   "type": "rectangle",
+   "id": "api",
+   "x": 24,
+   "y": 128,
+   "width": 428,
+   "height": 532,
+   "role": "zone-light",
+   "code": "LlmObservabilityLab.Api",
+   "titleAt": "right"
+  },
+  {
+   "type": "rectangle",
+   "id": "obs",
+   "x": 24,
+   "y": 700,
+   "width": 612,
+   "height": 180,
+   "role": "zone-warm",
+   "code": "grafana/otel-lgtm (Docker)",
+   "titleAt": "right"
+  },
+  {
+   "type": "rectangle",
+   "id": "client",
+   "cx": 144,
+   "y": 24,
+   "role": "external",
+   "pill": true,
+   "label": "Team client",
+   "sub": "X-Team-Id: engineering"
+  },
+  {
+   "type": "rectangle",
+   "id": "ctx",
+   "x": 44,
+   "y": 160,
+   "width": 200,
+   "role": "component",
+   "label": "Team context",
+   "sub": "TeamContextMiddleware"
+  },
+  {
+   "type": "rectangle",
+   "id": "rl",
+   "x": 44,
+   "y": 260,
+   "width": 200,
+   "role": "component",
+   "label": "Rate limiter",
+   "sub": "429 over quota"
+  },
+  {
+   "type": "rectangle",
+   "id": "uc",
+   "x": 44,
+   "y": 360,
+   "width": 200,
+   "role": "component",
+   "label": "Chat use case",
+   "sub": "AskChatUseCase.Ask"
+  },
+  {
+   "type": "rectangle",
+   "id": "meter",
+   "x": 272,
+   "y": 460,
+   "width": 160,
+   "role": "component",
+   "label": "Token meter",
+   "sub": "ai_meter.tokens"
+  },
+  {
+   "type": "rectangle",
+   "id": "otel",
+   "x": 44,
+   "y": 560,
+   "width": 200,
+   "role": "component",
+   "label": "OpenTelemetry",
+   "sub": "OTLP → :4317"
+  },
+  {
+   "type": "rectangle",
+   "id": "azure",
+   "x": 468,
+   "y": 360,
+   "width": 168,
+   "role": "external",
+   "label": "Azure OpenAI",
+   "sub": "or FakeChatClient"
+  },
+  {
+   "type": "cylinder",
+   "id": "prom",
+   "x": 64,
+   "y": 748,
+   "width": 160,
+   "role": "component",
+   "label": "Prometheus",
+   "sub": "metrics"
+  },
+  {
+   "type": "cylinder",
+   "id": "tempo",
+   "x": 252,
+   "y": 748,
+   "width": 160,
+   "role": "component",
+   "label": "Tempo + Loki",
+   "sub": "traces · logs"
+  },
+  {
+   "type": "rectangle",
+   "id": "graf",
+   "x": 444,
+   "y": 756,
+   "width": 176,
+   "role": "focal",
+   "label": "Grafana",
+   "sub": "AI Meter dashboard"
+  },
+  {
+   "type": "arrow",
+   "id": "a1",
+   "from": "client",
+   "to": "ctx"
+  },
+  {
+   "type": "arrow",
+   "id": "a2",
+   "from": "ctx",
+   "to": "rl"
+  },
+  {
+   "type": "arrow",
+   "id": "a3",
+   "from": "rl",
+   "to": "uc"
+  },
+  {
+   "type": "arrow",
+   "id": "a4",
+   "from": "uc",
+   "to": "azure",
+   "label": "chat"
+  },
+  {
+   "type": "arrow",
+   "id": "a5",
+   "from": "uc",
+   "to": "meter",
+   "fromSide": "bottom",
+   "toSide": "left",
+   "accent": true,
+   "step": 1,
+   "label": "tokens"
+  },
+  {
+   "type": "arrow",
+   "id": "a6",
+   "from": "meter",
+   "to": "otel",
+   "fromSide": "bottom",
+   "toSide": "right",
+   "accent": true,
+   "step": 2
+  },
+  {
+   "type": "arrow",
+   "id": "a8",
+   "from": "otel",
+   "to": "tempo",
+   "mid": 680
+  },
+  {
+   "type": "arrow",
+   "id": "a7",
+   "from": "otel",
+   "to": "prom",
+   "accent": true,
+   "step": 3
+  },
+  {
+   "type": "arrow",
+   "id": "a9",
+   "from": "prom",
+   "to": "graf",
+   "fromSide": "bottom",
+   "toSide": "bottom",
+   "accent": true,
+   "step": 4
+  },
+  {
+   "type": "arrow",
+   "id": "a10",
+   "from": "tempo",
+   "to": "graf"
+  }
+ ]
+}

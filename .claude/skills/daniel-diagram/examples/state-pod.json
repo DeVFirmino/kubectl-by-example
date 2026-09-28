@@ -1,0 +1,89 @@
+{
+ "type": "excalidraw",
+ "version": 2,
+ "source": "daniel-diagram",
+ "size": "article",
+ "title": "Pod phases",
+ "alt": "A pod starts Pending, becomes Running once its containers start, and ends Succeeded when they exit 0 or Failed when one exits non-zero, with restartPolicy set to Never.",
+ "appState": {
+  "viewBackgroundColor": "#FBF4E6"
+ },
+ "elements": [
+  {
+   "type": "ellipse",
+   "id": "s",
+   "cx": 330,
+   "y": 24,
+   "width": 20,
+   "height": 20,
+   "role": "start"
+  },
+  {
+   "type": "rectangle",
+   "id": "pending",
+   "cx": 330,
+   "y": 76,
+   "role": "component",
+   "code": "Pending"
+  },
+  {
+   "type": "rectangle",
+   "id": "running",
+   "cx": 330,
+   "y": 188,
+   "role": "component",
+   "code": "Running"
+  },
+  {
+   "type": "rectangle",
+   "id": "ok",
+   "cx": 190,
+   "y": 336,
+   "role": "component",
+   "code": "Succeeded"
+  },
+  {
+   "type": "rectangle",
+   "id": "bad",
+   "cx": 470,
+   "y": 336,
+   "role": "focal",
+   "code": "Failed"
+  },
+  {
+   "type": "arrow",
+   "id": "t0",
+   "from": "s",
+   "to": "pending"
+  },
+  {
+   "type": "arrow",
+   "id": "t1",
+   "from": "pending",
+   "to": "running",
+   "label": "containers start"
+  },
+  {
+   "type": "arrow",
+   "id": "t2",
+   "from": "running",
+   "to": "ok",
+   "code": "exit 0"
+  },
+  {
+   "type": "arrow",
+   "id": "t3",
+   "from": "running",
+   "to": "bad",
+   "code": "exit 1"
+  },
+  {
+   "type": "callout",
+   "id": "n",
+   "x": 448,
+   "y": 204,
+   "text": "restartPolicy: Never",
+   "to": "running"
+  }
+ ]
+}

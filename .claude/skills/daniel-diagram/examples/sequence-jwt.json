@@ -1,0 +1,255 @@
+{
+ "type": "excalidraw",
+ "version": 2,
+ "source": "daniel-diagram",
+ "size": "article",
+ "title": "JWT bearer request",
+ "legend": [
+  {
+   "line": "solid",
+   "text": "call"
+  },
+  {
+   "line": "dashed",
+   "text": "response"
+  }
+ ],
+ "alt": "The client sends GET /books with a bearer token; the JwtBearer handler validates it, and a valid token reaches BooksController and returns 200 OK while an invalid or missing one returns 401 Unauthorized.",
+ "appState": {
+  "viewBackgroundColor": "#FBF4E6"
+ },
+ "elements": [
+  {
+   "type": "frame",
+   "id": "alt",
+   "x": 40,
+   "y": 216,
+   "width": 580,
+   "height": 240,
+   "op": "alt",
+   "guard": "[token valid]",
+   "split": 356,
+   "guard2": "[invalid or missing]"
+  },
+  {
+   "type": "rectangle",
+   "id": "client",
+   "x": 44,
+   "y": 24,
+   "width": 120,
+   "height": 68,
+   "role": "external",
+   "pill": true,
+   "label": "Client"
+  },
+  {
+   "type": "rectangle",
+   "id": "api",
+   "cx": 330,
+   "y": 24,
+   "width": 184,
+   "role": "component",
+   "label": "ASP.NET Core",
+   "sub": "JwtBearer"
+  },
+  {
+   "type": "rectangle",
+   "id": "ctrl",
+   "x": 452,
+   "y": 24,
+   "width": 180,
+   "height": 68,
+   "role": "component",
+   "code": "BooksController"
+  },
+  {
+   "type": "arrow",
+   "id": "l1",
+   "x": 104,
+   "y": 92,
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     384
+    ]
+   ],
+   "head": false,
+   "dashed": true,
+   "strokeColor": "#79513C"
+  },
+  {
+   "type": "arrow",
+   "id": "l2",
+   "x": 330,
+   "y": 92,
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     384
+    ]
+   ],
+   "head": false,
+   "dashed": true,
+   "strokeColor": "#79513C"
+  },
+  {
+   "type": "arrow",
+   "id": "l3",
+   "x": 542,
+   "y": 92,
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     384
+    ]
+   ],
+   "head": false,
+   "dashed": true,
+   "strokeColor": "#79513C"
+  },
+  {
+   "type": "rectangle",
+   "id": "bar1",
+   "x": 324,
+   "y": 124,
+   "width": 12,
+   "height": 300,
+   "role": "component"
+  },
+  {
+   "type": "rectangle",
+   "id": "bar2",
+   "x": 536,
+   "y": 244,
+   "width": 12,
+   "height": 60,
+   "role": "component"
+  },
+  {
+   "type": "arrow",
+   "id": "m1",
+   "x": 104,
+   "y": 132,
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     220,
+     0
+    ]
+   ],
+   "code": "GET /books + Bearer"
+  },
+  {
+   "type": "arrow",
+   "id": "m2",
+   "x": 336,
+   "y": 156,
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     32,
+     0
+    ],
+    [
+     32,
+     32
+    ],
+    [
+     0,
+     32
+    ]
+   ],
+   "label": "validate",
+   "labelSegment": 1
+  },
+  {
+   "type": "arrow",
+   "id": "m3",
+   "x": 336,
+   "y": 256,
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     200,
+     0
+    ]
+   ],
+   "label": "invoke"
+  },
+  {
+   "type": "arrow",
+   "id": "m4",
+   "x": 536,
+   "y": 292,
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     -200,
+     0
+    ]
+   ],
+   "dashed": true,
+   "code": "200 OK"
+  },
+  {
+   "type": "arrow",
+   "id": "m5",
+   "x": 324,
+   "y": 324,
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     -220,
+     0
+    ]
+   ],
+   "dashed": true,
+   "code": "200 OK"
+  },
+  {
+   "type": "arrow",
+   "id": "m6",
+   "x": 324,
+   "y": 412,
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     -220,
+     0
+    ]
+   ],
+   "dashed": true,
+   "code": "401 Unauthorized"
+  }
+ ]
+}
