@@ -1,6 +1,6 @@
 # kubectl by example
 
-Imperative `kubectl` commands, one section at a time, with real output from a local cluster.
+Run the imperative `kubectl` commands on a local cluster and compare what you see with the examples. Each section explains the commands and includes the YAML from a dry run.
 
 The sections follow the order of the [KodeKloud CKAD course](https://kodekloud.com/courses/certified-kubernetes-application-developer-ckad/). Each folder has a short README with the commands, what they do, a screenshot of the output where it helps, and the YAML that `--dry-run` generates.
 
